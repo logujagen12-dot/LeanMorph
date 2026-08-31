@@ -49,33 +49,63 @@ export function AIScreen() {
     setLoading(true);
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({
-            message: userMessage,
-            history: [...messages, tempMsg].slice(-10).map((m) => ({ role: m.role, content: m.content })),
-          }),
-        }
-      );
+      let assistantText = '';
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+              apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({
+              message: userMessage,
+              history: [...messages, tempMsg].slice(-10).map((m) => ({ role: m.role, content: m.content })),
+            }),
+          }
+        );
 
-      if (!response.ok) throw new Error('Chat failed');
-      const data = await response.json();
+        if (response.ok) {
+          const data = await response.json();
+          assistantText = data.response;
+        }
+      } catch (err) {
+        console.warn('Edge function not reachable, using local AI fallback:', err);
+      }
+
+      if (!assistantText) {
+        const today = new Date().toISOString().split('T')[0];
+        const { data: entries } = await supabase.from('food_entries').select('*').eq('user_id', session.user.id).eq('date', today);
+        const totals = (entries || []).reduce(
+          (acc, e) => ({
+            calories: acc.calories + (Number(e.calories) || 0),
+            protein: acc.protein + (Number(e.protein) || 0),
+            carbs: acc.carbs + (Number(e.carbs) || 0),
+            fat: acc.fat + (Number(e.fat) || 0),
+            fiber: acc.fiber + (Number(e.fiber) || 0),
+          }),
+          { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+        );
+
+        const { buildAIChatResponse } = await import('@/lib/aiFallback');
+        assistantText = buildAIChatResponse(
+          userMessage,
+          totals,
+          profile?.calorie_target || 2000,
+          profile?.protein_target || 150
+        );
+      }
 
       const aiMsg: AIMessage = {
         id: crypto.randomUUID(),
         conversation_id: '',
         user_id: session.user.id,
         role: 'assistant',
-        content: data.response || 'Sorry, I could not process that.',
+        content: assistantText || 'I am here to help you reach your fitness goals!',
         metadata: null,
         created_at: new Date().toISOString(),
       };
@@ -86,16 +116,8 @@ export function AIScreen() {
         { ...tempMsg, id: undefined },
         { ...aiMsg, id: undefined },
       ]);
-    } catch {
-      setMessages((prev) => [...prev, {
-        id: crypto.randomUUID(),
-        conversation_id: '',
-        user_id: session.user.id,
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
-        metadata: null,
-        created_at: new Date().toISOString(),
-      }]);
+    } catch (e) {
+      console.error(e);
     }
     setLoading(false);
   };
