@@ -1,0 +1,13 @@
+{
+  "name": "leanmorph-server",
+  "version": "0.1.0",
+  "description": "LeanMorph backend server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

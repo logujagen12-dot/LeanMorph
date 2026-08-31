@@ -1,0 +1,184 @@
+{
+  "profile": {
+    "name": "Karthi",
+    "age": 18,
+    "gender": "Male",
+    "height": 158,
+    "weight": 39,
+    "activity": "Very Active"
+  },
+  "targets": {
+    "calories": 2500,
+    "protein": 80,
+    "carbs": 250,
+    "fat": 65,
+    "fiber": 30,
+    "steps": 2000,
+    "waterGlasses": 8,
+    "sleepHours": 8
+  },
+  "goals": [],
+  "reminders": [],
+  "weightLog": [
+    {
+      "day": "2026-08-14",
+      "kg": 39
+    }
+  ],
+  "history": {
+    "2026-08-13": {
+      "date": "2026-08-13",
+      "calories": 0,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 0,
+      "fiber": 0,
+      "water": 3,
+      "sleepH": 6.1,
+      "steps": 2500,
+      "workouts": 2
+    }
+  },
+  "days": {
+    "2026-08-13": {
+      "water": 3,
+      "meals": [
+        {
+          "id": "mmsruceb74iltdpv",
+          "meal": "Breakfast",
+          "name": "fooddd",
+          "cal": 0,
+          "prot": 0,
+          "carb": 0,
+          "fat": 0,
+          "fiber": 0,
+          "color": "#1D9E75"
+        }
+      ],
+      "workouts": [
+        {
+          "name": "🏋️ Weight Training",
+          "type": "Strength",
+          "dur": "45 min",
+          "kcal": "320"
+        },
+        {
+          "name": "🏃 Running",
+          "type": "Cardio",
+          "dur": "30 min",
+          "kcal": "280"
+        }
+      ],
+      "sleep": {
+        "bed": "00:15",
+        "wake": "06:22",
+        "quality": "😴 Excellent",
+        "hours": 6.1,
+        "efficiency": 94,
+        "stages": [
+          "deep",
+          "light",
+          "rem",
+          "light",
+          "deep",
+          "rem",
+          "light",
+          "awake"
+        ]
+      },
+      "stepsToday": 2500
+    },
+    "2026-08-14": {
+      "water": 0,
+      "meals": [],
+      "workouts": [],
+      "sleep": {
+        "bed": "",
+        "wake": "",
+        "quality": "😴 Excellent",
+        "hours": 0,
+        "efficiency": 0,
+        "stages": [
+          "light",
+          "light",
+          "light",
+          "light",
+          "light",
+          "light",
+          "light",
+          "light"
+        ]
+      },
+      "stepsToday": 0
+    },
+    "2026-08-12": {
+      "water": 0,
+      "meals": [],
+      "workouts": [],
+      "sleep": {
+        "bed": "23:14",
+        "wake": "06:22",
+        "quality": "😴 Excellent",
+        "hours": 7.2,
+        "efficiency": 94,
+        "stages": [
+          "light",
+          "deep",
+          "deep",
+          "rem",
+          "light",
+          "deep",
+          "rem",
+          "light"
+        ]
+      },
+      "stepsToday": 0
+    },
+    "2026-08-15": {
+      "water": 0,
+      "meals": [],
+      "workouts": [],
+      "sleep": {
+        "bed": "23:14",
+        "wake": "06:22",
+        "quality": "😴 Excellent",
+        "hours": 7.2,
+        "efficiency": 94,
+        "stages": [
+          "light",
+          "deep",
+          "deep",
+          "rem",
+          "light",
+          "deep",
+          "rem",
+          "light"
+        ]
+      },
+      "stepsToday": 0
+    },
+    "2026-08-16": {
+      "water": 0,
+      "meals": [],
+      "workouts": [],
+      "sleep": {
+        "bed": "23:14",
+        "wake": "06:22",
+        "quality": "😴 Excellent",
+        "hours": 7.2,
+        "efficiency": 94,
+        "stages": [
+          "light",
+          "deep",
+          "deep",
+          "rem",
+          "light",
+          "deep",
+          "rem",
+          "light"
+        ]
+      },
+      "stepsToday": 0
+    }
+  }
+}

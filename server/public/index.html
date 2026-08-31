@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeanMorph — Your Health Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#1D9E75;--green-light:#E1F5EE;--green-mid:#5DCAA5;
+  --amber:#EF9F27;--amber-light:#FAEEDA;
+  --coral:#D85A30;--coral-light:#FAECE7;
+  --blue:#378ADD;--blue-light:#E6F1FB;
+  --purple:#7F77DD;--purple-light:#EEEDFE;
+  --bg:#F8FAF9;--surface:#fff;--border:#E4EDE9;
+  --text:#1a2e25;--muted:#6B8C7E;--hint:#9EB5AA;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+h1,h2,h3,h4,.brand{font-family:'Syne',sans-serif}
+
+/* LAYOUT */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;overflow-y:auto;z-index:100}
+.main{margin-left:240px;flex:1;min-height:100vh}
+
+/* SIDEBAR */
+.brand-wrap{padding:28px 24px 20px;border-bottom:1px solid var(--border)}
+.brand{font-size:22px;font-weight:800;color:var(--green);letter-spacing:-0.5px}
+.brand span{color:var(--text)}
+.tagline{font-size:11px;color:var(--muted);margin-top:2px}
+nav{padding:16px 12px;flex:1}
+.nav-section{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--hint);text-transform:uppercase;padding:12px 12px 6px;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:all .15s;margin:2px 0;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:#F0F9F5;color:var(--green)}
+.nav-item.active{background:var(--green-light);color:var(--green)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--coral);color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px}
+
+/* DATE + GREETING */
+.topbar{padding:24px 32px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.greeting h2{font-size:26px;font-weight:700;color:var(--text)}
+.greeting p{color:var(--muted);font-size:14px;margin-top:2px}
+.date-pill{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--muted)}
+
+/* PAGES */
+.page{display:none;padding:24px 32px 40px}
+.page.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+.card-sm{border-radius:12px;padding:16px}
+.section-title{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+
+/* GRID */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+
+/* METRIC CARDS */
+.metric{padding:18px;border-radius:14px;border:1px solid var(--border);background:var(--surface)}
+.metric-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:18px}
+.metric-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;line-height:1}
+.metric-unit{font-size:12px;color:var(--muted);margin-left:2px}
+.metric-label{font-size:12px;color:var(--muted);margin-top:4px}
+.metric-sub{font-size:11px;margin-top:6px;padding:3px 8px;border-radius:99px;display:inline-block;font-weight:500}
+.up{background:#E1F5EE;color:#0F6E56}
+.down{background:var(--coral-light);color:var(--coral)}
+.neutral{background:var(--amber-light);color:#854F0B}
+
+/* PROGRESS RING */
+.ring-wrap{display:flex;align-items:center;gap:16px}
+.ring-info{flex:1}
+.ring-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.ring-sub{font-size:12px;color:var(--muted)}
+.progress-bar{height:6px;background:#E4EDE9;border-radius:99px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:99px;transition:width .6s ease}
+
+/* FOOD LOG */
+.food-entry{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.food-entry:last-child{border-bottom:none}
+.food-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.food-name{flex:1;font-size:14px;font-weight:500}
+.food-cal{font-size:13px;color:var(--muted)}
+.food-macro{font-size:11px;color:var(--hint)}
+
+/* WORKOUT */
+.workout-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);margin-bottom:10px;cursor:pointer;transition:all .15s}
+.workout-card:hover{border-color:var(--green);background:var(--green-light)}
+.workout-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.workout-info{flex:1}
+.workout-name{font-size:15px;font-weight:600;color:var(--text)}
+.workout-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.workout-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+
+/* WATER */
+.water-drops{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.drop{width:38px;height:38px;border-radius:50%;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:18px;background:#fff;color:var(--blue);user-select:none}
+.drop.filled{background:var(--blue);color:#fff}
+.drop:hover:not(.filled){background:var(--blue-light)}
+
+/* SLEEP */
+.sleep-block{display:flex;gap:4px;margin:14px 0}
+.sleep-hr{flex:1;height:40px;border-radius:4px;background:#E4EDE9;position:relative;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--hint)}
+.sleep-hr.deep{background:#7F77DD;color:#fff}
+.sleep-hr.light{background:#AFA9EC;color:#fff}
+.sleep-hr.rem{background:#5DCAA5;color:#fff}
+.sleep-hr.awake{background:#F0997B;color:#fff}
+.sleep-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.legend-dot{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.legend-sq{width:10px;height:10px;border-radius:2px}
+
+/* CHARTS (CSS) */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding-bottom:4px;margin:14px 0}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{border-radius:4px 4px 0 0;width:100%;transition:height .5s ease}
+.bar-label{font-size:10px;color:var(--muted)}
+.bar-val{font-size:10px;font-weight:600;color:var(--text)}
+
+/* FORM ELEMENTS */
+input[type=text],input[type=number],select,textarea{
+  border:1px solid var(--border);border-radius:10px;padding:10px 14px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);
+  background:var(--surface);outline:none;width:100%;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+.btn{padding:10px 20px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:#0F6E56}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:8px}
+
+/* GOALS */
+.goal-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;border:1px solid var(--border);margin-bottom:10px}
+.goal-emoji{font-size:22px;width:36px;text-align:center}
+.goal-info{flex:1}
+.goal-name{font-size:14px;font-weight:600}
+.goal-target{font-size:12px;color:var(--muted);margin-bottom:6px}
+.goal-pct{font-size:13px;font-weight:700;color:var(--green)}
+
+/* BMI */
+.bmi-scale{height:12px;border-radius:99px;background:linear-gradient(to right,#85B7EB,#5DCAA5,#EF9F27,#D85A30);margin:14px 0;position:relative}
+.bmi-marker{position:absolute;top:-4px;width:20px;height:20px;border-radius:50%;background:var(--text);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);transform:translateX(-50%);transition:left .5s}
+
+/* NOTIFICATION */
+.notif{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:12px;background:var(--green-light);border:1px solid #9FE1CB;margin-bottom:10px}
+.notif-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.notif-content{flex:1}
+.notif-title{font-size:13px;font-weight:600;color:#0F6E56}
+.notif-body{font-size:12px;color:#085041;margin-top:2px}
+.notif-time{font-size:11px;color:#1D9E75;margin-top:4px}
+.notif.warn{background:var(--amber-light);border-color:#FAC775}
+.notif.warn .notif-title{color:#854F0B}
+.notif.warn .notif-body{color:#633806}
+.notif.warn .notif-time{color:#BA7517}
+
+/* PROFILE */
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:#fff}
+.stat-row{display:flex;gap:16px;margin:16px 0}
+.stat-box{flex:1;text-align:center;padding:12px;background:var(--bg);border-radius:12px}
+.stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* SCROLL */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#C8DDD5;border-radius:99px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:20px;padding:28px;width:420px;max-width:92vw}
+.modal h3{font-size:20px;font-weight:700;margin-bottom:18px}
+.form-row{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.form-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:1000;opacity:0;transform:translateY(12px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* TIMER */
+.timer-display{font-family:'Syne',sans-serif;font-size:56px;font-weight:700;text-align:center;letter-spacing:-2px;color:var(--text);margin:20px 0}
+.timer-btns{display:flex;gap:10px;justify-content:center}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{width:60px;overflow:hidden}.sidebar:hover{width:240px}
+  .main{margin-left:60px}
+  .nav-item span,.brand-wrap .tagline,.brand-wrap .brand{display:none}
+  .sidebar:hover .nav-item span,.sidebar:hover .brand-wrap .tagline,.sidebar:hover .brand-wrap .brand{display:block}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .main{margin-left:0}.sidebar{display:none}
+  .grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr}
+  .page{padding:16px}
+}
+
+/* Daily banner + glass cards */
+.day-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px 18px;border-radius:16px;margin-bottom:18px;
+  background:linear-gradient(110deg,#0d4a3a 0%,#1D9E75 45%,#5DCAA5 100%);
+  color:#fff;box-shadow:0 12px 32px rgba(29,158,117,.25);
+}
+.day-banner .db-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:.02em}
+.day-banner .db-sub{font-size:12px;opacity:.9;margin-top:2px}
+.day-banner .db-pill{background:rgba(255,255,255,.15);padding:6px 12px;border-radius:99px;font-size:12px;font-weight:600}
+.glass-card{
+  background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(248,250,249,.98));
+  border:1px solid var(--border);border-radius:18px;padding:20px;
+  box-shadow:0 4px 24px rgba(26,46,37,.06);
+  position:relative;overflow:hidden;
+}
+.glass-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--green),var(--blue),var(--purple));
+  opacity:.85;
+}
+.ring-row{display:flex;align-items:center;gap:22px}
+.ring-svg{flex-shrink:0}
+.ring-meta{flex:1}
+.ring-meta h4{font-family:'Syne',sans-serif;font-size:16px;margin-bottom:4px}
+.ring-meta p{font-size:12px;color:var(--muted);line-height:1.5}
+.spark{font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em}
+.dash-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.dash-mini .dm{
+  background:var(--bg);border-radius:12px;padding:10px 12px;text-align:center;
+  border:1px solid var(--border);
+}
+.dm-k{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.dm-l{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.sleep-stage-hr{transition:transform .2s,box-shadow .2s}
+.sleep-stage-hr:hover{transform:scaleY(1.08);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand-wrap">
+    <div class="brand">Lean<span>Morph</span></div>
+    <div class="tagline">Your health companion</div>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <button type="button" class="nav-item active" data-nav="dashboard" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <div class="nav-section">Track</div>
+    <button type="button" class="nav-item" data-nav="nutrition" onclick="showPage('nutrition',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 6v6l4 2"/></svg>
+      <span>Nutrition</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="workout" onclick="showPage('workout',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v6M18 4v6M3 10h18M5 14l7 6 7-6"/></svg>
+      <span>Workout</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="sleep" onclick="showPage('sleep',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <span>Sleep</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="water" onclick="showPage('water',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 9.5 6 13.5 6 15a6 6 0 0012 0c0-1.5-.5-5.5-6-13z"/></svg>
+      <span>Hydration</span>
+    </button>
+    <div class="nav-section">Health</div>
+    <button type="button" class="nav-item" data-nav="weight" onclick="showPage('weight',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/><path d="M8 8l8 8M16 8l-8 8"/></svg>
+      <span>Weight</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="bmi" onclick="showPage('bmi',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 12l4-4 4 4 4-4"/></svg>
+      <span>BMI & Weight</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="goals" onclick="showPage('goals',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span>Goals</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="reminders" onclick="showPage('reminders',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span>Reminders</span>
+      <span class="nav-badge" id="reminderBadge">3</span>
+    </button>
+    <div class="nav-section">You</div>
+    <button type="button" class="nav-item" data-nav="profile" onclick="showPage('profile',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <div class="topbar">
+    <div class="greeting">
+      <h2 id="greetingText">Good morning! 👋</h2>
+      <p id="greetingName">Ready to crush your health goals today?</p>
+    </div>
+    <div class="date-pill" id="dateDisplay"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div style="height:20px"></div>
+    <div class="day-banner" id="dayBanner">
+      <div>
+        <div class="db-title">Today's log</div>
+        <div class="db-sub" id="dayBannerSub">Resets at midnight · Add meals & activity as you go</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btn-outline btn-sm" id="prevDayBtn" title="Previous day">←</button>
+        <div class="db-pill" id="logDatePill" style="min-width:140px;text-align:center">—</div>
+        <button class="btn btn-outline btn-sm" id="nextDayBtn" title="Next day">→</button>
+        <button class="btn btn-sm" id="todayBtn" title="Today" style="margin-left:8px">Today</button>
+        <input type="date" id="datePicker" style="margin-left:8px;border-radius:8px;padding:6px;border:1px solid var(--border);background:var(--surface)">
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <div class="metric">
+        <div class="metric-icon" style="background:#E1F5EE">🔥</div>
+        <div><span class="metric-val" id="d-calories">0</span><span class="metric-unit">kcal</span></div>
+        <div class="metric-label">Calories today</div>
+        <div class="metric-sub neutral" id="d-cal-sub">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:#E6F1FB">💧</div>
+        <div><span class="metric-val" id="d-water">0</span><span class="metric-unit" id="d-water-unit">/8 glasses</span></div>
+        <div class="metric-label">Hydration</div>
+        <div class="metric-sub neutral" id="d-water-sub">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:#EEEDFE">🏃</div>
+        <div><span class="metric-val" id="d-steps">0</span></div>
+        <div class="metric-label">Steps today</div>
+        <div class="metric-sub neutral" id="d-steps-sub">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--amber-light)">😴</div>
+        <div><span class="metric-val" id="d-sleep">—</span><span class="metric-unit">hrs</span></div>
+        <div class="metric-label">Last sleep log</div>
+        <div class="metric-sub neutral" id="d-sleep-sub">Log on Sleep page</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:18px">
+      <div class="glass-card">
+        <div class="spark">Live balance</div>
+        <div class="ring-row" style="margin-top:12px">
+          <svg class="ring-svg" id="calRing" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true"></svg>
+          <div class="ring-meta">
+            <h4 id="ringTitle">Fuel vs goal</h4>
+            <p id="ringBody">Your calorie ring fills as you log food. Exercise lowers net intake.</p>
+            <div class="dash-mini">
+              <div class="dm"><div class="dm-k" id="ring-net">0</div><div class="dm-l">Net kcal</div></div>
+              <div class="dm"><div class="dm-k" id="ring-burn">0</div><div class="dm-l">Burned</div></div>
+              <div class="dm"><div class="dm-k" id="ring-goal">0</div><div class="dm-l">Goal</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Steps (manual)</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Connect a wearable later — for now, type today's steps to drive your dashboard ring.</p>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input type="number" id="d-steps-input" min="0" step="100" placeholder="8412" style="flex:1">
+          <button type="button" class="btn btn-primary btn-sm" onclick="saveStepsToday()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Weekly Steps</div>
+        <div class="bar-chart" id="stepsChart"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:0 2px" id="stepsChartLabels">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Macros Today</div>
+        <div style="margin:10px 0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">🫘 Protein</span><span style="font-size:13px;font-weight:600" id="d-mac-prot-lbl">0g / 150g</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="d-bar-prot" style="width:0%;background:var(--blue)"></div></div>
+        </div>
+        <div style="margin:10px 0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">🌾 Carbs</span><span style="font-size:13px;font-weight:600" id="d-mac-carb-lbl">0g / 250g</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="d-bar-carb" style="width:0%;background:var(--amber)"></div></div>
+        </div>
+        <div style="margin:10px 0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">🥑 Fat</span><span style="font-size:13px;font-weight:600" id="d-mac-fat-lbl">0g / 65g</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="d-bar-fat" style="width:0%;background:var(--green)"></div></div>
+        </div>
+        <div style="margin:10px 0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">🥦 Fiber</span><span style="font-size:13px;font-weight:600" id="d-mac-fiber-lbl">0g / 30g</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="d-bar-fiber" style="width:0%;background:var(--green-mid)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Today's Activity</div>
+        <div id="d-workouts"></div>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px;width:100%" onclick="showPage('workout')">+ Log Workout</button>
+      </div>
+      <div class="card">
+        <div class="section-title">Recent Meals</div>
+        <div id="d-meals"></div>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px;width:100%" onclick="showPage('nutrition')">+ Log Meal</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="section-title">Health pulse</div>
+      <p style="font-size:12px;color:var(--muted);margin:6px 0 12px">Blended score from calories, macros, water, sleep, and movement vs your targets.</p>
+      <div class="grid-4" style="margin-top:10px">
+        <div style="text-align:center">
+          <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--green)" id="d-score-overall">—</div>
+          <div style="font-size:12px;color:var(--muted)">Overall</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--blue)" id="d-score-nut">—</div>
+          <div style="font-size:12px;color:var(--muted)">Nutrition</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--purple)" id="d-score-fit">—</div>
+          <div style="font-size:12px;color:var(--muted)">Fitness</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--amber)" id="d-score-rec">—</div>
+          <div style="font-size:12px;color:var(--muted)">Recovery</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUTRITION -->
+  <div class="page" id="page-nutrition">
+    <div style="height:20px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:18px;font-weight:700">Nutrition Log</h3>
+      <button class="btn btn-primary btn-sm" onclick="openAddFood()">+ Add Food</button>
+    </div>
+
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="metric" style="padding:14px">
+        <div class="metric-icon" style="background:#FAECE7;font-size:16px;width:30px;height:30px;border-radius:8px;margin-bottom:8px">🔥</div>
+        <div><span class="metric-val" style="font-size:22px" id="n-cal">0</span><span class="metric-unit">kcal</span></div>
+        <div class="metric-label">Consumed</div>
+      </div>
+      <div class="metric" style="padding:14px">
+        <div class="metric-icon" style="background:var(--blue-light);font-size:16px;width:30px;height:30px;border-radius:8px;margin-bottom:8px">🫘</div>
+        <div><span class="metric-val" style="font-size:22px" id="n-prot">0</span><span class="metric-unit">g</span></div>
+        <div class="metric-label">Protein</div>
+      </div>
+      <div class="metric" style="padding:14px">
+        <div class="metric-icon" style="background:var(--amber-light);font-size:16px;width:30px;height:30px;border-radius:8px;margin-bottom:8px">🌾</div>
+        <div><span class="metric-val" style="font-size:22px" id="n-carb">0</span><span class="metric-unit">g</span></div>
+        <div class="metric-label">Carbs</div>
+      </div>
+      <div class="metric" style="padding:14px">
+        <div class="metric-icon" style="background:var(--green-light);font-size:16px;width:30px;height:30px;border-radius:8px;margin-bottom:8px">🥑</div>
+        <div><span class="metric-val" style="font-size:22px" id="n-fat">0</span><span class="metric-unit">g</span></div>
+        <div class="metric-label">Fat</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-title">Yesterday & recent calories</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Totals are saved when the day rolls over at midnight. Today is shown on the cards above.</p>
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="metric" style="padding:14px">
+          <div class="metric-label" id="nh-y-label">Yesterday</div>
+          <div><span class="metric-val" style="font-size:24px" id="nh-y-cal">—</span><span class="metric-unit">kcal</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px" id="nh-y-mac">—</div>
+        </div>
+        <div class="metric" style="padding:14px">
+          <div class="metric-label">7-day average</div>
+          <div><span class="metric-val" style="font-size:24px" id="nh-avg-cal">—</span><span class="metric-unit">kcal/day</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px" id="nh-avg-note">From saved days</div>
+        </div>
+      </div>
+      <div class="section-title" style="margin-top:4px">Daily calories (last 7 days)</div>
+      <div class="bar-chart" id="nutritionHistChart" style="height:120px"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);padding:0 2px" id="nutritionHistLabels"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Calorie goal progress</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;color:var(--muted)" id="n-goal-consumed">0 consumed</span>
+        <span style="font-size:13px;color:var(--muted)" id="n-goal-target">Goal: — kcal</span>
+      </div>
+      <div class="progress-bar" style="height:10px">
+        <div class="progress-fill" id="n-goal-bar" style="width:0%;background:var(--green)"></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px" id="n-goal-foot">—</div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div id="mealLog"></div>
+  </div>
+
+  <!-- WORKOUT -->
+  <div class="page" id="page-workout">
+    <div style="height:20px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:18px;font-weight:700">Workout Tracker</h3>
+      <button class="btn btn-primary btn-sm" onclick="openAddWorkout()">+ Log Workout</button>
+    </div>
+
+    <!-- Timer -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-title">Workout Timer</div>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+      <div class="timer-btns">
+        <button class="btn btn-primary" id="timerBtn" onclick="toggleTimer()">▶ Start</button>
+        <button class="btn btn-outline" onclick="resetTimer()">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">Today's Workouts</div>
+    <div id="workoutLog"></div>
+
+    <div class="section-title" style="margin-top:20px">Quick Add — Popular Exercises</div>
+    <div class="grid-3">
+      <div class="workout-card" onclick="quickAddWorkout('🏃 Running','Cardio','30 min','280 kcal')">
+        <div class="workout-icon" style="background:#FAECE7">🏃</div>
+        <div class="workout-info"><div class="workout-name">Running</div><div class="workout-meta">Outdoor · Cardio</div></div>
+      </div>
+      <div class="workout-card" onclick="quickAddWorkout('🏋️ Weight Training','Strength','45 min','320 kcal')">
+        <div class="workout-icon" style="background:var(--purple-light)">🏋️</div>
+        <div class="workout-info"><div class="workout-name">Weight Training</div><div class="workout-meta">Gym · Strength</div></div>
+      </div>
+      <div class="workout-card" onclick="quickAddWorkout('🧘 Yoga','Flexibility','30 min','150 kcal')">
+        <div class="workout-icon" style="background:var(--green-light)">🧘</div>
+        <div class="workout-info"><div class="workout-name">Yoga</div><div class="workout-meta">Home · Flexibility</div></div>
+      </div>
+      <div class="workout-card" onclick="quickAddWorkout('🚴 Cycling','Cardio','45 min','380 kcal')">
+        <div class="workout-icon" style="background:var(--blue-light)">🚴</div>
+        <div class="workout-info"><div class="workout-name">Cycling</div><div class="workout-meta">Outdoor · Cardio</div></div>
+      </div>
+      <div class="workout-card" onclick="quickAddWorkout('🏊 Swimming','Full Body','30 min','250 kcal')">
+        <div class="workout-icon" style="background:#E6F1FB">🏊</div>
+        <div class="workout-info"><div class="workout-name">Swimming</div><div class="workout-meta">Pool · Full Body</div></div>
+      </div>
+      <div class="workout-card" onclick="quickAddWorkout('🤸 HIIT','Cardio','20 min','300 kcal')">
+        <div class="workout-icon" style="background:var(--amber-light)">🤸</div>
+        <div class="workout-info"><div class="workout-name">HIIT</div><div class="workout-meta">Home · Cardio</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLEEP -->
+  <div class="page" id="page-sleep">
+    <div style="height:20px"></div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Sleep Tracker</h3>
+
+    <div class="grid-4">
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--purple-light)">😴</div>
+        <div><span class="metric-val" id="s-hours">—</span><span class="metric-unit">hrs</span></div>
+        <div class="metric-label">Time asleep</div>
+        <div class="metric-sub neutral" id="s-hours-sub">Log below</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--green-light)">⏰</div>
+        <div><span class="metric-val" id="s-bed-h">—</span><span class="metric-unit" id="s-bed-m"> </span></div>
+        <div class="metric-label">Bedtime</div>
+        <div class="metric-sub neutral" id="s-bed-sub">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--amber-light)">🌅</div>
+        <div><span class="metric-val" id="s-wake-h">—</span><span class="metric-unit" id="s-wake-m"> </span></div>
+        <div class="metric-label">Wake time</div>
+        <div class="metric-sub neutral" id="s-wake-sub">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--blue-light)">💤</div>
+        <div><span class="metric-val" id="s-eff">—</span><span class="metric-unit">%</span></div>
+        <div class="metric-label">Efficiency</div>
+        <div class="metric-sub neutral" id="s-eff-sub">—</div>
+      </div>
+    </div>
+
+      <div class="card">
+        <div class="section-title">Estimated sleep stages</div>
+        <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px">Illustrative blocks from duration & quality — not clinical sleep staging.</p>
+        <div class="sleep-block" id="sleepBlocks"></div>
+      <div class="sleep-legend">
+        <div class="legend-dot"><div class="legend-sq" style="background:#7F77DD"></div>Deep sleep</div>
+        <div class="legend-dot"><div class="legend-sq" style="background:#AFA9EC"></div>Light sleep</div>
+        <div class="legend-dot"><div class="legend-sq" style="background:#5DCAA5"></div>REM</div>
+        <div class="legend-dot"><div class="legend-sq" style="background:#F0997B"></div>Awake</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Last 7 nights (hours)</div>
+        <div class="bar-chart" id="sleepChart"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)" id="sleepChartLabels">
+          <span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Log last night&apos;s sleep</div>
+        <p style="font-size:12px;color:var(--muted);margin:-6px 0 12px">Times are when you got in bed and when you got up (wake may be the next morning).</p>
+        <div class="form-row">
+          <label class="form-label">Bedtime</label>
+          <input type="time" id="s-bedtime" style="width:100%">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Wake Time</label>
+          <input type="time" id="s-wake" style="width:100%">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Sleep Quality</label>
+          <select id="s-quality" style="width:100%">
+            <option>😴 Excellent</option>
+            <option>😊 Good</option>
+            <option>😐 Fair</option>
+            <option>😫 Poor</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="logSleep()">Save Sleep Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATER -->
+  <div class="page" id="page-water">
+    <div style="height:20px"></div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Hydration Tracker</h3>
+
+    <div class="card" style="text-align:center;margin-bottom:20px;padding:32px">
+      <div style="font-size:72px;font-family:'Syne',sans-serif;font-weight:800;color:var(--blue)" id="waterCount">6</div>
+      <div style="font-size:16px;color:var(--muted);margin-top:4px" id="waterSubLine">of 8 glasses</div>
+      <div class="progress-bar" style="height:10px;max-width:300px;margin:16px auto 0">
+        <div class="progress-fill" id="waterBar" style="width:75%;background:var(--blue)"></div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:10px" id="waterHint">—</div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title">Today's Intake</div>
+      <div class="water-drops" id="waterDrops"></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="addWater()">+ Add Glass (250ml)</button>
+        <button class="btn btn-outline" onclick="removeWater()">− Remove</button>
+        <button class="btn btn-outline" onclick="addCustomWater()">+ Custom</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Weekly Hydration</div>
+        <div class="bar-chart" id="waterChart"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Hydration Tips</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">
+          <p>💡 Drink a glass of water before each meal to aid digestion and reduce overeating.</p>
+          <br>
+          <p>⏰ Set hourly reminders to sip water throughout the day.</p>
+          <br>
+          <p>🌿 Herbal teas and fruits with high water content (watermelon, cucumber) count too!</p>
+          <br>
+          <p>🏃 Add 500ml for every 30 minutes of exercise.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BMI -->
+  <div class="page" id="page-bmi">
+    <div style="height:20px"></div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">BMI & Weight</h3>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Calculate BMI</div>
+        <div class="form-row">
+          <label class="form-label">Height</label>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="bmi-h" placeholder="175" value="175" style="flex:1">
+            <select id="bmi-hu" style="width:70px"><option>cm</option><option>in</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Weight</label>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="bmi-w" placeholder="70" value="70" style="flex:1">
+            <select id="bmi-wu" style="width:70px"><option>kg</option><option>lbs</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="calcBMI()">Calculate BMI</button>
+
+        <div id="bmiResult" style="margin-top:20px;display:none">
+          <div style="font-family:'Syne',sans-serif;font-size:48px;font-weight:700;text-align:center" id="bmiVal">22.9</div>
+          <div style="text-align:center;font-size:14px;font-weight:600;margin-top:4px" id="bmiCat">Normal Weight</div>
+          <div class="bmi-scale" style="margin-top:16px">
+            <div class="bmi-marker" id="bmiMarker" style="left:35%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px">
+            <span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Weight History</div>
+        <div class="bar-chart" id="weightChart"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+          <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span>
+        </div>
+        <div style="margin-top:14px">
+          <div class="form-row">
+            <label class="form-label">Log Today's Weight (kg)</label>
+            <div style="display:flex;gap:8px">
+              <input type="number" id="w-today" placeholder="70.5" step="0.1" style="flex:1">
+              <button class="btn btn-primary btn-sm" onclick="logWeight()">Log</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">BMI Categories</div>
+      <div class="grid-4" style="margin-top:8px">
+        <div style="background:var(--blue-light);padding:14px;border-radius:12px">
+          <div style="font-weight:700;color:var(--blue);font-size:15px">Below 18.5</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">Underweight — consider consulting a nutritionist</div>
+        </div>
+        <div style="background:var(--green-light);padding:14px;border-radius:12px">
+          <div style="font-weight:700;color:var(--green);font-size:15px">18.5 – 24.9</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">Normal weight — keep up the great work!</div>
+        </div>
+        <div style="background:var(--amber-light);padding:14px;border-radius:12px">
+          <div style="font-weight:700;color:#854F0B;font-size:15px">25 – 29.9</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">Overweight — focus on diet and exercise</div>
+        </div>
+        <div style="background:var(--coral-light);padding:14px;border-radius:12px">
+          <div style="font-weight:700;color:var(--coral);font-size:15px">30 and above</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">Obese — seek medical guidance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEIGHT TRACKING -->
+  <div class="page" id="page-weight">
+    <div style="height:20px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <h3 style="font-size:18px;font-weight:700">Body weight</h3>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">One entry per day · synced with your account</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title">Log weight</div>
+        <div class="form-row">
+          <label class="form-label">Date</label>
+          <input type="date" id="bw-date" style="width:100%">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Weight (kg)</label>
+          <input type="number" id="bw-kg" step="0.1" min="20" max="300" placeholder="70.4" style="width:100%">
+        </div>
+        <button type="button" class="btn btn-primary" style="width:100%" onclick="submitBodyWeight()">Save entry</button>
+        <p style="font-size:11px;color:var(--hint);margin-top:10px">Saving the same date again overwrites that day.</p>
+      </div>
+      <div class="card">
+        <div class="section-title">Trend (last 14 days)</div>
+        <div class="bar-chart" id="bodyWeightChart" style="height:110px"></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);flex-wrap:wrap;gap:4px" id="bodyWeightLabels"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="section-title">Daily log</div>
+      <div id="bodyWeightList" style="font-size:14px"></div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="page" id="page-goals">
+    <div style="height:20px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:18px;font-weight:700">Health Goals</h3>
+      <button class="btn btn-primary btn-sm" onclick="openAddGoal()">+ Add Goal</button>
+    </div>
+    <div id="goalsList"></div>
+  </div>
+
+  <!-- REMINDERS -->
+  <div class="page" id="page-reminders">
+    <div style="height:20px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:18px;font-weight:700">Reminders</h3>
+      <button class="btn btn-primary btn-sm" onclick="openAddReminder()">+ Add Reminder</button>
+    </div>
+    <div id="remindersList"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="page-profile">
+    <div style="height:20px"></div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px">My Profile</h3>
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div class="avatar" id="profileAvatar">AK</div>
+          <div>
+            <div style="font-size:18px;font-weight:700" id="profileName">Arjun Kumar</div>
+            <div style="font-size:13px;color:var(--muted)" id="profileAge">28 years • Male</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-num" id="p-streak">14</div><div class="stat-lbl">Day Streak 🔥</div></div>
+          <div class="stat-box"><div class="stat-num" id="p-workouts">48</div><div class="stat-lbl">Workouts</div></div>
+          <div class="stat-box"><div class="stat-num" id="p-score">87</div><div class="stat-lbl">Health Score</div></div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="form-row">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="prof-name" value="Arjun Kumar">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Age</label>
+            <input type="number" id="prof-age" value="28">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Gender</label>
+            <select id="prof-gender"><option>Male</option><option>Female</option><option>Other</option></select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Height (cm)</label>
+            <input type="number" id="prof-height" value="175">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Weight (kg)</label>
+            <input type="number" id="prof-weight" value="70">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Activity Level</label>
+            <select id="prof-activity">
+              <option>Sedentary</option>
+              <option selected>Lightly Active</option>
+              <option>Moderately Active</option>
+              <option>Very Active</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="saveProfile()">Save Profile</button>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="section-title">Daily Targets</div>
+          <div class="form-row">
+            <label class="form-label">Calorie Goal (kcal)</label>
+            <input type="number" id="t-cal" value="1960">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Protein Goal (g)</label>
+            <input type="number" id="t-prot" value="150">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Steps Goal</label>
+            <input type="number" id="t-steps" value="10000">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Water Goal (glasses)</label>
+            <input type="number" id="t-water" value="8">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Carbs goal (g)</label>
+            <input type="number" id="t-carb" value="250">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Fat goal (g)</label>
+            <input type="number" id="t-fat" value="65">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Fiber goal (g)</label>
+            <input type="number" id="t-fiber" value="30">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Sleep Goal (hours)</label>
+            <input type="number" id="t-sleep" step="0.5" value="8">
+          </div>
+          <button type="button" class="btn btn-primary" style="width:100%" onclick="saveTargets()">Save daily targets</button>
+          <p style="font-size:11px;color:var(--hint);margin-top:8px">Targets are stored on the server and in your browser so they survive refresh.</p>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Achievements 🏆</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+            <div style="background:var(--amber-light);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;color:#854F0B">🔥 14 Day Streak</div>
+            <div style="background:var(--green-light);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;color:#0F6E56">💧 Hydration Hero</div>
+            <div style="background:var(--purple-light);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;color:#3C3489">🏃 50K Steps Week</div>
+            <div style="background:var(--blue-light);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;color:#185FA5">😴 Sleep Champion</div>
+            <div style="background:var(--coral-light);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;color:#993C1D">🏋️ Gym Rat</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="foodModal">
+  <div class="modal">
+    <h3>Log Food</h3>
+    <div class="form-row"><label class="form-label">Meal</label>
+      <select id="f-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+    </div>
+    <div class="form-row"><label class="form-label">Food Name</label><input type="text" id="f-name" placeholder="e.g. Oats with banana"></div>
+    <div class="grid-2" style="margin-bottom:0">
+      <div class="form-row"><label class="form-label">Calories</label><input type="number" id="f-cal" placeholder="350"></div>
+      <div class="form-row"><label class="form-label">Protein (g)</label><input type="number" id="f-prot" placeholder="12"></div>
+      <div class="form-row"><label class="form-label">Carbs (g)</label><input type="number" id="f-carb" placeholder="60"></div>
+      <div class="form-row"><label class="form-label">Fat (g)</label><input type="number" id="f-fat" placeholder="8"></div>
+      <div class="form-row"><label class="form-label">Fiber (g)</label><input type="number" id="f-fiber" placeholder="0"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('foodModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addFood()">Add Food</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="workoutModal">
+  <div class="modal">
+    <h3>Log Workout</h3>
+    <div class="form-row"><label class="form-label">Exercise</label><input type="text" id="w-name" placeholder="e.g. Morning Run"></div>
+    <div class="form-row"><label class="form-label">Type</label>
+      <select id="w-type"><option>Cardio</option><option>Strength</option><option>Flexibility</option><option>Sports</option><option>Other</option></select>
+    </div>
+    <div class="grid-2" style="margin-bottom:0">
+      <div class="form-row"><label class="form-label">Duration (min)</label><input type="number" id="w-dur" placeholder="30"></div>
+      <div class="form-row"><label class="form-label">Calories Burned</label><input type="number" id="w-kcal" placeholder="250"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('workoutModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addWorkout()">Log Workout</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="goalModal">
+  <div class="modal">
+    <h3>Add Goal</h3>
+    <div class="form-row"><label class="form-label">Goal Name</label><input type="text" id="g-name" placeholder="e.g. Run 5K"></div>
+    <div class="form-row"><label class="form-label">Category</label>
+      <select id="g-cat"><option>Fitness</option><option>Nutrition</option><option>Sleep</option><option>Hydration</option><option>Weight</option></select>
+    </div>
+    <div class="grid-2" style="margin-bottom:0">
+      <div class="form-row"><label class="form-label">Current</label><input type="number" id="g-cur" placeholder="0"></div>
+      <div class="form-row"><label class="form-label">Target</label><input type="number" id="g-tar" placeholder="100"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Deadline</label><input type="date" id="g-date"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('goalModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addGoal()">Add Goal</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="reminderModal">
+  <div class="modal">
+    <h3>Add Reminder</h3>
+    <div class="form-row"><label class="form-label">Title</label><input type="text" id="r-title" placeholder="e.g. Drink water"></div>
+    <div class="form-row"><label class="form-label">Time</label><input type="time" id="r-time" value="09:00"></div>
+    <div class="form-row"><label class="form-label">Type</label>
+      <select id="r-type"><option>💧 Hydration</option><option>🏃 Exercise</option><option>💊 Medication</option><option>🍎 Meal</option><option>😴 Sleep</option><option>📏 Measurement</option></select>
+    </div>
+    <div class="form-row"><label class="form-label">Repeat</label>
+      <select id="r-repeat"><option>Daily</option><option>Weekdays</option><option>Weekends</option><option>Once</option></select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('reminderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addReminder()">Add Reminder</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="customWaterModal">
+  <div class="modal">
+    <h3>Add Custom Amount</h3>
+    <div class="form-row"><label class="form-label">Amount (ml)</label><input type="number" id="cw-ml" placeholder="500" value="500"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('customWaterModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="doAddCustomWater()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = (() => {
+  try {
+    const origin = window.location && window.location.origin;
+    if (origin && origin !== 'null') return `${origin}/api`;
+  } catch {
+    // ignore
+  }
+
+  try {
+    const u = new URL(window.location.href);
+    if (u.protocol === 'file:') return 'http://127.0.0.1:3847/api';
+    return u.origin + '/api';
+  } catch {
+    return 'http://127.0.0.1:3847/api';
+  }
+})();
+
+const LS_KEY_TARGETS = 'leanmorph_targets_v1';
+const LS_KEY_WEIGHT = 'leanmorph_weight_log_v1';
+const LS_KEY_TARGETS_OLD = 'vitalis_targets_v1';
+const LS_KEY_WEIGHT_OLD = 'vitalis_weight_log_v1';
+
+function persistTargetsLocal() {
+  try {
+    localStorage.setItem(LS_KEY_TARGETS, JSON.stringify(state.targets));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function loadTargetsLocal() {
+  try {
+    const rawNew = localStorage.getItem(LS_KEY_TARGETS);
+    const rawOld = localStorage.getItem(LS_KEY_TARGETS_OLD);
+    const raw = rawNew || rawOld;
+    if (!raw) return null;
+    const o = JSON.parse(raw);
+    return o && typeof o === 'object' ? o : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistWeightLocal() {
+  try {
+    localStorage.setItem(LS_KEY_WEIGHT, JSON.stringify(state.weightLog || []));
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function loadWeightLocal() {
+  try {
+    const rawNew = localStorage.getItem(LS_KEY_WEIGHT);
+    const rawOld = localStorage.getItem(LS_KEY_WEIGHT_OLD);
+    const raw = rawNew || rawOld;
+    if (!raw) return [];
+    const a = JSON.parse(raw);
+    return Array.isArray(a) ? a : [];
+  } catch {
+    return [];
+  }
+}
+
+function shiftLocalYMD(deltaDays) {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() + deltaDays);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Helpers for date navigation
+function ymdAddDays(ymd, delta) {
+  const parts = ymd.split('-').map((s) => parseInt(s, 10));
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  d.setDate(d.getDate() + delta);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function ymdToLabel(ymd) {
+  try {
+    const [y, m, dd] = ymd.split('-').map((s) => parseInt(s, 10));
+    const d = new Date(y, m - 1, dd);
+    return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  } catch (e) { return ymd; }
+}
+
+let persistTimer = null;
+function schedulePersist() {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    persistState();
+  }, 350);
+}
+
+function localYMD() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function newMealId() {
+  return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+}
+
+function defaultTargets() {
+  return { calories: 1960, protein: 150, carbs: 250, fat: 65, fiber: 30, steps: 10000, waterGlasses: 8, sleepHours: 8 };
+}
+
+function defaultSleep() {
+  return {
+    bed: '23:14',
+    wake: '06:22',
+    quality: '😴 Excellent',
+    hours: 7.2,
+    efficiency: 94,
+    stages: ['light', 'deep', 'deep', 'rem', 'light', 'deep', 'rem', 'light'],
+  };
+}
+
+function ensureMealIds() {
+  state.meals.forEach((m) => {
+    if (!m.id) m.id = newMealId();
+  });
+}
+
+function workoutBurnTotal() {
+  return state.workouts.reduce((s, w) => {
+    const n = parseInt(String(w.kcal != null ? w.kcal : '').replace(/\D/g, ''), 10);
+    return s + (Number.isFinite(n) ? n : 0);
+  }, 0);
+}
+
+function sumTotals() {
+  return state.meals.reduce(
+    (a, f) => ({
+      cal: a.cal + (+f.cal || 0),
+      prot: a.prot + (+f.prot || 0),
+      carb: a.carb + (+f.carb || 0),
+      fat: a.fat + (+f.fat || 0),
+      fiber: a.fiber + (+f.fiber || 0),
+    }),
+    { cal: 0, prot: 0, carb: 0, fat: 0, fiber: 0 }
+  );
+}
+
+function pruneHistory() {
+  const h = { ...(state.history || {}) };
+  const keys = Object.keys(h).sort();
+  while (keys.length > 24) delete h[keys.shift()];
+  state.history = h;
+}
+
+// Track the last seen system date so user navigation to past dates doesn't
+// trigger an automatic rollover. Rollover happens only when the system date
+// advanced and the user was still on the previous day.
+let lastSeenLocalDate = localYMD();
+function ensureCurrentLogDate() {
+  const today = localYMD();
+  if (!state.logDate) state.logDate = today;
+  // If system date hasn't changed since last check, do nothing.
+  if (lastSeenLocalDate === today) return;
+  // Only perform rollover when the app was still looking at lastSeenLocalDate
+  // (i.e. user didn't manually navigate to another day).
+  if (state.logDate !== lastSeenLocalDate) {
+    lastSeenLocalDate = today;
+    return;
+  }
+  const prev = state.logDate;
+  if (!state.history) state.history = {};
+  const t = sumTotals();
+  state.history[prev] = {
+    date: prev,
+    calories: t.cal,
+    protein: t.prot,
+    carbs: t.carb,
+    fat: t.fat,
+    fiber: t.fiber,
+    water: state.water,
+    sleepH: state.sleep && state.sleep.hours ? state.sleep.hours : 0,
+    steps: state.stepsToday || 0,
+    workouts: state.workouts.length,
+  };
+  pruneHistory();
+  state.logDate = today;
+  state.meals = [];
+  state.water = 0;
+  state.workouts = [];
+  state.stepsToday = 0;
+  state.sleep = {
+    bed: '',
+    wake: '',
+    quality: '😴 Excellent',
+    hours: 0,
+    efficiency: 0,
+    stages: ['light', 'light', 'light', 'light', 'light', 'light', 'light', 'light'],
+  };
+  lastSeenLocalDate = today;
+  toast('🌅 New day — food, water, workouts & steps reset. Log fresh data as you go!');
+  schedulePersist();
+  renderMeals();
+  updateNutritionTotals();
+  renderWater();
+  renderWorkouts();
+  refreshDashboard();
+  syncSleepFormFromState();
+  renderSleep();
+  refreshChartsFromHistory();
+}
+
+function last7DayKeys() {
+  const out = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    out.push(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    );
+  }
+  return out;
+}
+
+function refreshChartsFromHistory() {
+  const keys = last7DayKeys();
+  const today = localYMD();
+  const stepGoal = state.targets.steps || 10000;
+  const steps = keys.map((k) => {
+    if (k === today) return state.stepsToday || 0;
+    return (state.history[k] && state.history[k].steps) || 0;
+  });
+  const sleepH = keys.map((k) => {
+    if (k === today) return state.sleep && state.sleep.hours ? state.sleep.hours : 0;
+    return (state.history[k] && state.history[k].sleepH) || 0;
+  });
+  const waterG = keys.map((k) => {
+    if (k === today) return state.water || 0;
+    return (state.history[k] && state.history[k].water) || 0;
+  });
+  const wGoal = state.targets.waterGlasses || 8;
+  makeBarChart('stepsChart', steps, 'var(--green)', Math.max(...steps, stepGoal, 1));
+  const sleepVals = sleepH.map((h) => (h ? Math.round(h * 10) / 10 : 0));
+  const sleepMax = Math.max(9, ...sleepVals, 1);
+  makeBarChart('sleepChart', sleepVals, 'var(--purple)', sleepMax);
+  makeBarChart('waterChart', waterG, 'var(--blue)', Math.max(wGoal, ...waterG, 1));
+  const sl = document.getElementById('sleepChartLabels');
+  if (sl) {
+    sl.innerHTML = keys.map((k) => `<span title="${k}">${k.slice(5)}</span>`).join('');
+  }
+}
+
+function updateCalorieRing(consumed, goal, burned) {
+  const el = document.getElementById('calRing');
+  if (!el) return;
+  const g = goal || 1;
+  const pct = Math.min(100, Math.round((consumed / g) * 100));
+  const R = 44;
+  const C = 2 * Math.PI * R;
+  const dash = C * (pct / 100);
+  el.innerHTML = `<circle cx="56" cy="56" r="${R}" fill="none" stroke="#E4EDE9" stroke-width="10"/>
+    <circle cx="56" cy="56" r="${R}" fill="none" stroke="#1D9E75" stroke-width="10" stroke-linecap="round"
+      transform="rotate(-90 56 56)" stroke-dasharray="${dash} ${C - dash}" />`;
+  const net = Math.max(0, consumed - burned);
+  const rg = document.getElementById('ring-goal');
+  const rn = document.getElementById('ring-net');
+  const rb = document.getElementById('ring-burn');
+  if (rg) rg.textContent = goal.toLocaleString();
+  if (rn) rn.textContent = net.toLocaleString();
+  if (rb) rb.textContent = burned.toLocaleString();
+}
+
+function computeHealthScores() {
+  const t = sumTotals();
+  const g = state.targets;
+  const burn = workoutBurnTotal();
+  const calPct = g.calories ? Math.min(1, t.cal / g.calories) : 0;
+  const macroAvg =
+    ((g.protein ? Math.min(1, t.prot / g.protein) : 0) +
+      (g.carbs ? Math.min(1, t.carb / g.carbs) : 0) +
+      (g.fat ? Math.min(1, t.fat / g.fat) : 0) +
+      (g.fiber ? Math.min(1, t.fiber / g.fiber) : 0)) /
+    4;
+  const waterPct = g.waterGlasses ? Math.min(1, state.water / g.waterGlasses) : 0;
+  const sleepH = state.sleep && state.sleep.hours ? state.sleep.hours : 0;
+  const sleepPct = g.sleepHours && sleepH ? Math.min(1, sleepH / g.sleepHours) : 0;
+  const stepPct = g.steps ? Math.min(1, (state.stepsToday || 0) / g.steps) : 0;
+  const nut = Math.round(Math.min(100, (calPct * 0.45 + macroAvg * 0.55) * 100));
+  const fit = Math.round(Math.min(100, (Math.min(1, burn / 400) * 0.5 + stepPct * 0.5) * 100));
+  const rec = Math.round(Math.min(100, (sleepPct * 0.55 + waterPct * 0.45) * 100));
+  const overall = Math.round(nut * 0.38 + fit * 0.32 + rec * 0.3);
+  return { overall, nut, fit, rec };
+}
+
+function refreshDashboard() {
+  const t = sumTotals();
+  const g = state.targets;
+  const burn = workoutBurnTotal();
+  const goal = g.calories || 2000;
+  const calPct = goal ? Math.min(100, Math.round((t.cal / goal) * 100)) : 0;
+  const sub = document.getElementById('d-cal-sub');
+  if (sub) {
+    if (!t.cal) sub.textContent = 'Start logging on Nutrition';
+    else if (calPct >= 100) sub.textContent = 'At or above calorie goal';
+    else sub.textContent = `${calPct}% of ${goal.toLocaleString()} kcal goal`;
+    sub.className = 'metric-sub ' + (calPct > 105 ? 'down' : calPct >= 90 ? 'up' : 'neutral');
+  }
+  const wg = g.waterGlasses || 8;
+  const wu = document.getElementById('d-water-unit');
+  if (wu) wu.textContent = `/${wg} glasses`;
+  const dwSub = document.getElementById('d-water-sub');
+  if (dwSub) {
+    const left = Math.max(0, wg - state.water);
+    dwSub.textContent = left ? `${left} more to goal` : 'Hydration goal met';
+    dwSub.className = 'metric-sub ' + (state.water >= wg ? 'up' : 'neutral');
+  }
+  const dwa = document.getElementById('d-water');
+  if (dwa) dwa.textContent = state.water;
+  const st = document.getElementById('d-steps-sub');
+  if (st) {
+    const sp = g.steps ? Math.min(100, Math.round(((state.stepsToday || 0) / g.steps) * 100)) : 0;
+    st.textContent = g.steps ? `${sp}% of step goal` : '—';
+    st.className = 'metric-sub ' + (sp >= 100 ? 'up' : 'neutral');
+  }
+  const dst = document.getElementById('d-steps');
+  if (dst) dst.textContent = (state.stepsToday || 0).toLocaleString();
+  let sh = state.sleep && state.sleep.hours ? state.sleep.hours : 0;
+  if (sh <= 0.05 && state.history) {
+    const keys = Object.keys(state.history).sort();
+    for (let i = keys.length - 1; i >= 0; i--) {
+      const c = state.history[keys[i]];
+      if (c && c.sleepH > 0) {
+        sh = c.sleepH;
+        break;
+      }
+    }
+  }
+  const ds = document.getElementById('d-sleep');
+  const dss = document.getElementById('d-sleep-sub');
+  if (ds) ds.textContent = sh ? sh.toFixed(1) : '—';
+  if (dss) {
+    if (!sh) dss.textContent = 'Save a sleep log tonight';
+    else if (state.sleep && state.sleep.hours > 0.05) {
+      dss.textContent = state.sleep.quality ? state.sleep.quality.replace(/^[^\s]+\s*/, '') : 'Logged';
+    } else dss.textContent = 'Recent night from history';
+    dss.className = 'metric-sub ' + (sh >= (g.sleepHours || 8) - 0.25 ? 'up' : 'neutral');
+  }
+  const pPct = (x, max) => (max ? Math.min(100, Math.round((x / max) * 100)) : 0);
+  const setBar = (lblId, barId, cur, max) => {
+    const lbl = document.getElementById(lblId);
+    const bar = document.getElementById(barId);
+    if (lbl) lbl.textContent = `${Math.round(cur)}g / ${max}g`;
+    if (bar) bar.style.width = `${pPct(cur, max)}%`;
+  };
+  setBar('d-mac-prot-lbl', 'd-bar-prot', t.prot, g.protein || 1);
+  setBar('d-mac-carb-lbl', 'd-bar-carb', t.carb, g.carbs || 1);
+  setBar('d-mac-fat-lbl', 'd-bar-fat', t.fat, g.fat || 1);
+  setBar('d-mac-fiber-lbl', 'd-bar-fiber', t.fiber, g.fiber || 1);
+  const scores = computeHealthScores();
+  const so = document.getElementById('d-score-overall');
+  const sn = document.getElementById('d-score-nut');
+  const sf = document.getElementById('d-score-fit');
+  const sr = document.getElementById('d-score-rec');
+  if (so) so.textContent = scores.overall;
+  if (sn) sn.textContent = scores.nut;
+  if (sf) sf.textContent = scores.fit;
+  if (sr) sr.textContent = scores.rec;
+  updateCalorieRing(t.cal, goal, burn);
+  const pill = document.getElementById('logDatePill');
+  if (pill) pill.textContent = state.logDate || localYMD();
+}
+
+function updateNutritionGoalCard(t, burn) {
+  const g = state.targets;
+  const goal = g.calories || 2000;
+  const net = Math.max(0, t.cal - burn);
+  const left = Math.max(0, goal - t.cal);
+  const pctBar = goal ? Math.min(100, Math.round((t.cal / goal) * 100)) : 0;
+  const gc = document.getElementById('n-goal-consumed');
+  const gt = document.getElementById('n-goal-target');
+  const gb = document.getElementById('n-goal-bar');
+  const gf = document.getElementById('n-goal-foot');
+  if (gc) gc.textContent = `${t.cal.toLocaleString()} consumed · ${burn.toLocaleString()} kcal burned (exercise)`;
+  if (gt) gt.textContent = `Goal: ${goal.toLocaleString()} kcal`;
+  if (gb) {
+    gb.style.width = `${pctBar}%`;
+    gb.style.background = pctBar > 100 ? 'var(--coral)' : pctBar > 90 ? 'var(--amber)' : 'var(--green)';
+  }
+  if (gf) {
+    gf.textContent = `${left.toLocaleString()} kcal remaining to goal · Net after exercise: ${net.toLocaleString()} kcal`;
+  }
+}
+
+async function loadStateFromServer(day = null, createIfMissing = true) {
+  try {
+    const dateKey = day || localYMD();
+    const r = await fetch(`${API_BASE}/state?date=${encodeURIComponent(dateKey)}`);
+    if (!r.ok) throw new Error('bad status');
+    const data = await r.json();
+    // Per-day values
+    state.water = data.water ?? 0;
+    state.meals = Array.isArray(data.meals) ? data.meals : [];
+    state.workouts = Array.isArray(data.workouts) ? data.workouts : [];
+    state.stepsToday = Number(data.stepsToday) || 0;
+    if (data.sleep && typeof data.sleep === 'object') state.sleep = { ...defaultSleep(), ...data.sleep };
+
+    // Global values (profile/targets/history) merge but don't overwrite local-only fields
+    state.goals = Array.isArray(data.goals) ? data.goals : state.goals;
+    state.reminders = Array.isArray(data.reminders)
+      ? data.reminders.map((x) => ({ ...x, on: !!x.on }))
+      : state.reminders;
+    const fromApi = (data.targets && typeof data.targets === 'object' && data.targets) || {};
+    state.targets = { ...defaultTargets(), ...fromApi };
+    if (data.history && typeof data.history === 'object') state.history = { ...data.history };
+    if (Array.isArray(data.weightLog) && data.weightLog.length) state.weightLog = data.weightLog.map((w) => ({ day: w.day, kg: Number(w.kg) }));
+    else {
+      const lw = loadWeightLocal();
+      state.weightLog = lw.length ? lw : [];
+    }
+    if (data.profile && typeof data.profile === 'object') {
+      state.profile = { ...state.profile, ...data.profile };
+      applyProfileToDom();
+    }
+
+    ensureMealIds();
+    state.logDate = dateKey;
+    applyTargetsToDom();
+    persistTargetsLocal();
+    persistWeightLocal();
+    const si = document.getElementById('d-steps-input');
+    if (si) si.value = state.stepsToday || '';
+
+    // If we loaded a date that didn't exist yet on the server, create an empty record.
+    // This satisfies the requirement: check -> create if missing -> then user edits save to that date.
+    if (createIfMissing) await persistState();
+  } catch (e) {
+    console.warn('[LeanMorph] API not reachable — using local data.', e.message);
+    // Fallback: if the bundled server auto-started on the next port (3848), try that.
+    try {
+      const dateKey = day || localYMD();
+      const alt = await fetch(`http://127.0.0.1:3848/api/state?date=${encodeURIComponent(dateKey)}`);
+      if (alt.ok) {
+        const data = await alt.json();
+        state.water = data.water ?? 0;
+        state.meals = Array.isArray(data.meals) ? data.meals : [];
+        state.workouts = Array.isArray(data.workouts) ? data.workouts : [];
+        state.stepsToday = Number(data.stepsToday) || 0;
+        if (data.sleep && typeof data.sleep === 'object') state.sleep = { ...defaultSleep(), ...data.sleep };
+        state.goals = Array.isArray(data.goals) ? data.goals : state.goals;
+        state.reminders = Array.isArray(data.reminders)
+          ? data.reminders.map((x) => ({ ...x, on: !!x.on }))
+          : state.reminders;
+        const fromApi = (data.targets && typeof data.targets === 'object' && data.targets) || {};
+        state.targets = { ...defaultTargets(), ...fromApi };
+        if (data.history && typeof data.history === 'object') state.history = { ...data.history };
+        if (Array.isArray(data.weightLog) && data.weightLog.length) state.weightLog = data.weightLog.map((w) => ({ day: w.day, kg: Number(w.kg) }));
+        else {
+          const lw = loadWeightLocal();
+          state.weightLog = lw.length ? lw : [];
+        }
+        if (data.profile && typeof data.profile === 'object') {
+          state.profile = { ...state.profile, ...data.profile };
+          applyProfileToDom();
+        }
+
+        ensureMealIds();
+        state.logDate = dateKey;
+        applyTargetsToDom();
+        persistTargetsLocal();
+        persistWeightLocal();
+        const si = document.getElementById('d-steps-input');
+        if (si) si.value = state.stepsToday || '';
+
+        if (createIfMissing) await persistState();
+        return;
+      }
+    } catch (e2) {
+      /* ignore fallback failure */
+    }
+    const lsT = loadTargetsLocal();
+    if (lsT) state.targets = { ...defaultTargets(), ...lsT };
+    const lsW = loadWeightLocal();
+    if (lsW.length) state.weightLog = lsW;
+    applyTargetsToDom();
+  }
+}
+
+async function persistState() {
+  try {
+    const body = {
+      logDate: state.logDate || localYMD(),
+      water: state.water,
+      profile: state.profile,
+      meals: state.meals,
+      workouts: state.workouts,
+      sleep: state.sleep,
+      stepsToday: state.stepsToday || 0,
+      targets: state.targets,
+      history: state.history || {},
+      goals: state.goals,
+      reminders: state.reminders,
+      weightLog: state.weightLog || [],
+    };
+    const r = await fetch(`${API_BASE}/state`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error('save failed');
+    const data = await r.json().catch(() => null);
+    if (data && data.targets && typeof data.targets === 'object') {
+      state.targets = { ...defaultTargets(), ...data.targets };
+      persistTargetsLocal();
+    }
+    if (data && Array.isArray(data.weightLog)) {
+      state.weightLog = data.weightLog.map((w) => ({ day: w.day, kg: Number(w.kg) }));
+      persistWeightLocal();
+    }
+  } catch (e) {
+    console.warn('[LeanMorph] Could not save to server', e.message);
+    persistTargetsLocal();
+    persistWeightLocal();
+  }
+}
+
+function applyProfileToDom() {
+  const p = state.profile;
+  const nameEl = document.getElementById('prof-name');
+  const ageEl = document.getElementById('prof-age');
+  const genderEl = document.getElementById('prof-gender');
+  const hEl = document.getElementById('prof-height');
+  const wEl = document.getElementById('prof-weight');
+  const actEl = document.getElementById('prof-activity');
+  if (nameEl) nameEl.value = p.name || '';
+  if (ageEl) ageEl.value = p.age != null ? p.age : '';
+  if (genderEl) {
+    const opts = [...genderEl.options].map((o) => o.value);
+    genderEl.value = opts.includes(p.gender) ? p.gender : genderEl.value;
+  }
+  if (hEl) hEl.value = p.height != null ? p.height : '';
+  if (wEl) wEl.value = p.weight != null ? p.weight : '';
+  if (actEl) {
+    const opts = [...actEl.options].map((o) => o.value);
+    actEl.value = opts.includes(p.activity) ? p.activity : actEl.value;
+  }
+  const pn = document.getElementById('profileName');
+  const pa = document.getElementById('profileAge');
+  const av = document.getElementById('profileAvatar');
+  if (pn) pn.textContent = p.name || '';
+  if (pa) pa.textContent = `${p.age} years · ${p.gender}`;
+  if (av && p.name) {
+    av.textContent = String(p.name).split(/\s+/).map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+}
+
+function applyTargetsToDom() {
+  const g = state.targets;
+  const ids = [
+    ['t-cal', g.calories],
+    ['t-prot', g.protein],
+    ['t-steps', g.steps],
+    ['t-water', g.waterGlasses],
+    ['t-carb', g.carbs],
+    ['t-fat', g.fat],
+    ['t-fiber', g.fiber],
+    ['t-sleep', g.sleepHours],
+  ];
+  ids.forEach(([id, v]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = v;
+  });
+}
+
+// STATE
+let state = {
+  profile: {
+    name: 'Arjun Kumar',
+    age: 28,
+    gender: 'Male',
+    height: 175,
+    weight: 70,
+    activity: 'Lightly Active',
+  },
+  logDate: '',
+  targets: defaultTargets(),
+  history: {},
+  sleep: defaultSleep(),
+  stepsToday: 8412,
+  water: 6,
+  meals: [
+    { id: 'seed1', meal: 'Breakfast', name: 'Oats with banana & honey', cal: 380, prot: 12, carb: 68, fat: 7, fiber: 6, color: '#1D9E75' },
+    { id: 'seed2', meal: 'Lunch', name: 'Grilled chicken rice bowl', cal: 620, prot: 52, carb: 74, fat: 14, fiber: 4, color: '#378ADD' },
+    { id: 'seed3', meal: 'Snack', name: 'Greek yogurt + almonds', cal: 240, prot: 18, carb: 22, fat: 10, fiber: 2, color: '#EF9F27' },
+    { id: 'seed4', meal: 'Dinner', name: 'Dal makhani with chapati', cal: 602, prot: 42, carb: 88, fat: 21, fiber: 10, color: '#7F77DD' },
+  ],
+  workouts: [{ name: '🏃 Morning Run', type: 'Cardio', dur: '32 min', kcal: '285' }],
+  goals: [
+    { name: 'Run 5K', cat: 'Fitness', emoji: '🏃', cur: 3.2, tar: 5, date: '2026-06-30' },
+    { name: 'Lose 5kg', cat: 'Weight', emoji: '⚖️', cur: 2, tar: 5, date: '2026-08-01' },
+    { name: 'Drink 8 glasses daily', cat: 'Hydration', emoji: '💧', cur: 6, tar: 8, date: '2026-05-31' },
+    { name: '100 pushups/day', cat: 'Fitness', emoji: '💪', cur: 65, tar: 100, date: '2026-07-01' },
+    { name: '8hrs sleep nightly', cat: 'Sleep', emoji: '😴', cur: 7.2, tar: 8, date: '2026-05-31' },
+  ],
+  reminders: [
+    { title: 'Morning water', time: '07:00', type: '💧 Hydration', repeat: 'Daily', on: true },
+    { title: 'Workout time', time: '06:30', type: '🏃 Exercise', repeat: 'Weekdays', on: true },
+    { title: 'Take vitamins', time: '08:00', type: '💊 Medication', repeat: 'Daily', on: false },
+  ],
+  timerRunning: false,
+  timerStart: null,
+  timerElapsed: 0,
+  timerInterval: null,
+  weightLog: [],
+};
+state.logDate = localYMD();
+
+// NAV
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach((b) => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const navBtn = btn || document.querySelector('.nav-item[data-nav="' + id + '"]');
+  if (navBtn) navBtn.classList.add('active');
+  if (id === 'nutrition') renderNutritionHistory();
+  if (id === 'weight') {
+    initBodyWeightForm();
+    renderBodyWeightUI();
+  }
+  if (id === 'sleep') {
+    syncSleepFormFromState();
+    renderSleep();
+    refreshChartsFromHistory();
+  }
+}
+
+// DATE & GREETING
+function initDate() {
+  const now = new Date();
+  const hrs = now.getHours();
+  const greet = hrs < 12 ? 'Good morning' : hrs < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greetingText').textContent = greet + '! 👋';
+  const first = (state.profile && state.profile.name && String(state.profile.name).trim().split(/\s+/)[0]) || 'there';
+  document.getElementById('greetingName').textContent = `Ready to crush your goals, ${first}?`;
+  const opts = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
+  document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-IN', opts);
+}
+
+function updateDateNavUI() {
+  const pill = document.getElementById('logDatePill');
+  const picker = document.getElementById('datePicker');
+  const d = state.logDate || localYMD();
+  if (pill) pill.textContent = ymdToLabel(d);
+  if (picker) picker.value = d;
+}
+
+async function loadDate(dateStr) {
+  // Persist current date before switching
+  await persistState().catch(() => {});
+  await loadStateFromServer(dateStr, true);
+  updateDateNavUI();
+  renderMeals(); renderWorkouts(); renderWater(); refreshDashboard(); updateNutritionTotals(); renderSleep(); renderReminders(); renderGoals(); renderBodyWeightUI();
+}
+
+function goPrevDay() { loadDate(ymdAddDays(state.logDate || localYMD(), -1)); }
+function goNextDay() { loadDate(ymdAddDays(state.logDate || localYMD(), 1)); }
+function goToday() { loadDate(localYMD()); }
+
+
+// TOAST
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// MODALS
+function openAddFood() { document.getElementById('foodModal').classList.add('open'); }
+function openAddWorkout() { document.getElementById('workoutModal').classList.add('open'); }
+function openAddGoal() {
+  const d = new Date(); d.setMonth(d.getMonth()+3);
+  document.getElementById('g-date').value = d.toISOString().split('T')[0];
+  document.getElementById('goalModal').classList.add('open');
+}
+function openAddReminder() { document.getElementById('reminderModal').classList.add('open'); }
+function addCustomWater() { document.getElementById('customWaterModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// FOOD
+function addFood() {
+  ensureCurrentLogDate();
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) {
+    toast('Please enter food name');
+    return;
+  }
+  const colors = ['#1D9E75', '#378ADD', '#EF9F27', '#7F77DD', '#D85A30'];
+  state.meals.push({
+    id: newMealId(),
+    meal: document.getElementById('f-meal').value,
+    name,
+    cal: +document.getElementById('f-cal').value || 0,
+    prot: +document.getElementById('f-prot').value || 0,
+    carb: +document.getElementById('f-carb').value || 0,
+    fat: +document.getElementById('f-fat').value || 0,
+    fiber: +document.getElementById('f-fiber').value || 0,
+    color: colors[state.meals.length % colors.length],
+  });
+  closeModal('foodModal');
+  ['f-name', 'f-cal', 'f-prot', 'f-carb', 'f-fat', 'f-fiber'].forEach((id) => (document.getElementById(id).value = ''));
+  renderMeals();
+  updateNutritionTotals();
+  schedulePersist();
+  toast('✅ Food logged!');
+}
+
+function renderMeals() {
+  ensureMealIds();
+  const groups = {};
+  state.meals.forEach((m) => {
+    if (!groups[m.meal]) groups[m.meal] = [];
+    groups[m.meal].push(m);
+  });
+  let html = '';
+  for (const [meal, items] of Object.entries(groups)) {
+    html += `<div class="card" style="margin-bottom:14px"><div class="section-title">${meal}</div>`;
+    items.forEach((f) => {
+      const fib = f.fiber ? ` · Fiber: ${f.fiber}g` : '';
+      html += `<div class="food-entry">
+        <div class="food-dot" style="background:${f.color}"></div>
+        <div style="flex:1"><div class="food-name">${f.name}</div>
+        <div class="food-macro">P: ${f.prot}g · C: ${f.carb}g · F: ${f.fat}g${fib}</div></div>
+        <div class="food-cal">${f.cal} kcal</div>
+        <button type="button" onclick="removeFood('${f.id}')" style="border:none;background:none;color:var(--hint);cursor:pointer;padding:0 0 0 8px;font-size:16px">×</button>
+      </div>`;
+    });
+    const total = items.reduce((s, f) => s + f.cal, 0);
+    html += `<div style="font-size:12px;color:var(--muted);text-align:right;padding-top:8px;border-top:1px solid var(--border);margin-top:4px">${total} kcal total</div></div>`;
+  }
+  document.getElementById('mealLog').innerHTML = html;
+  const last3 = state.meals.slice(-3);
+  document.getElementById('d-meals').innerHTML = last3.length
+    ? last3
+        .map(
+          (f) =>
+            `<div class="food-entry"><div class="food-dot" style="background:${f.color}"></div>
+    <div class="food-name">${f.name}</div><div class="food-cal">${f.cal} kcal</div></div>`
+        )
+        .join('')
+    : '<div style="color:var(--muted);font-size:13px;padding:8px 0">No meals logged yet today</div>';
+}
+
+function removeFood(id) {
+  state.meals = state.meals.filter((m) => m.id !== id);
+  renderMeals();
+  updateNutritionTotals();
+  schedulePersist();
+  toast('Food removed');
+}
+
+function renderNutritionHistory() {
+  const yKey = shiftLocalYMD(-1);
+  const y = state.history && state.history[yKey];
+  const lbl = document.getElementById('nh-y-label');
+  const elY = document.getElementById('nh-y-cal');
+  const elYM = document.getElementById('nh-y-mac');
+  if (lbl) lbl.textContent = 'Yesterday (' + yKey + ')';
+  if (elY) elY.textContent = y && y.calories != null ? Math.round(y.calories).toLocaleString() : '—';
+  if (elYM) {
+    if (y && (y.protein != null || y.carbs != null))
+      elYM.textContent = `P ${Math.round(y.protein || 0)}g · C ${Math.round(y.carbs || 0)}g · F ${Math.round(y.fat || 0)}g · Fiber ${Math.round(y.fiber || 0)}g`;
+    else elYM.textContent = y ? 'Macros stored from midnight rollover' : 'No saved day yet — data appears after the first midnight with meals logged';
+  }
+  const keys = last7DayKeys();
+  const today = localYMD();
+  const live = sumTotals();
+  const cals = keys.map((k) => {
+    if (k === today) return live.cal;
+    const h = state.history[k];
+    return h && h.calories != null ? h.calories : 0;
+  });
+  const sum = cals.reduce((a, b) => a + b, 0);
+  const avg = Math.round(sum / 7);
+  const avEl = document.getElementById('nh-avg-cal');
+  const avN = document.getElementById('nh-avg-note');
+  if (avEl) avEl.textContent = sum ? avg.toLocaleString() : '—';
+  if (avN) avN.textContent = sum ? 'Includes today (live) + past days in history' : '—';
+  const labEl = document.getElementById('nutritionHistLabels');
+  if (labEl) labEl.innerHTML = keys.map((k) => `<span>${k.slice(5)}</span>`).join('');
+  const chart = document.getElementById('nutritionHistChart');
+  if (chart) {
+    const mx = Math.max(...cals, (state.targets && state.targets.calories) * 0.25 || 400, 1);
+    makeBarChart('nutritionHistChart', cals.map((c) => Math.round(c)), 'var(--green)', mx);
+  }
+}
+
+function sortWeightLog() {
+  state.weightLog = [...(state.weightLog || [])].sort((a, b) => (a.day < b.day ? 1 : -1));
+}
+
+function initBodyWeightForm() {
+  const d = document.getElementById('bw-date');
+  if (d && !d.value) d.value = localYMD();
+}
+
+function renderBodyWeightUI() {
+  sortWeightLog();
+  const list = document.getElementById('bodyWeightList');
+  if (!list) return;
+  if (!state.weightLog.length) {
+    list.innerHTML = '<p style="color:var(--muted);padding:12px 0">No entries yet. Log your weight above.</p>';
+  } else {
+    list.innerHTML = state.weightLog
+      .slice(0, 80)
+      .map(
+        (w) => `
+      <div class="food-entry" style="justify-content:space-between">
+        <div><strong>${w.day}</strong> · <span style="color:var(--muted)">${w.kg} kg</span></div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="removeBodyWeightDay('${w.day}')">Remove</button>
+      </div>`
+      )
+      .join('');
+  }
+  const asc = [...state.weightLog].sort((a, b) => a.day.localeCompare(b.day)).slice(-14);
+  const vals = asc.map((w) => w.kg);
+  const lblEl = document.getElementById('bodyWeightLabels');
+  if (lblEl) lblEl.innerHTML = asc.map((k) => `<span>${k.day.slice(5)}</span>`).join('');
+  const c = document.getElementById('bodyWeightChart');
+  if (vals.length && c) {
+    makeBarChart('bodyWeightChart', vals.map((v) => Math.round(v * 10) / 10), 'var(--coral)', Math.max(...vals, 1));
+  } else if (c) {
+    c.innerHTML = '<div style="color:var(--muted);padding:20px;text-align:center;font-size:13px">No chart yet</div>';
+  }
+}
+
+function submitBodyWeight() {
+  initBodyWeightForm();
+  const dayEl = document.getElementById('bw-date');
+  const kgEl = document.getElementById('bw-kg');
+  const day = (dayEl && dayEl.value) || localYMD();
+  const kg = kgEl ? +kgEl.value : NaN;
+  if (!kg || kg < 15 || kg > 400) {
+    toast('Enter a valid weight (kg)');
+    return;
+  }
+  state.weightLog = [...(state.weightLog || []).filter((w) => w.day !== day), { day, kg: Math.round(kg * 10) / 10 }];
+  sortWeightLog();
+  persistWeightLocal();
+  renderBodyWeightUI();
+  schedulePersist();
+  toast('Weight saved for ' + day);
+}
+
+function removeBodyWeightDay(day) {
+  state.weightLog = (state.weightLog || []).filter((w) => w.day !== day);
+  persistWeightLocal();
+  renderBodyWeightUI();
+  schedulePersist();
+  toast('Removed ' + day);
+}
+
+function updateNutritionTotals() {
+  const t = sumTotals();
+  const burn = workoutBurnTotal();
+  document.getElementById('n-cal').textContent = t.cal.toLocaleString();
+  document.getElementById('n-prot').textContent = Math.round(t.prot);
+  document.getElementById('n-carb').textContent = Math.round(t.carb);
+  document.getElementById('n-fat').textContent = Math.round(t.fat);
+  document.getElementById('d-calories').textContent = t.cal.toLocaleString();
+  updateNutritionGoalCard(t, burn);
+  refreshDashboard();
+  refreshChartsFromHistory();
+  renderNutritionHistory();
+}
+
+// WORKOUT
+function addWorkout() {
+  ensureCurrentLogDate();
+  const name = document.getElementById('w-name').value.trim();
+  if (!name) {
+    toast('Please enter exercise name');
+    return;
+  }
+  state.workouts.push({
+    name,
+    type: document.getElementById('w-type').value,
+    dur: document.getElementById('w-dur').value + ' min',
+    kcal: document.getElementById('w-kcal').value,
+  });
+  closeModal('workoutModal');
+  ['w-name', 'w-dur', 'w-kcal'].forEach((id) => (document.getElementById(id).value = ''));
+  renderWorkouts();
+  updateNutritionTotals();
+  schedulePersist();
+  toast('✅ Workout logged!');
+}
+
+function quickAddWorkout(name, type, dur, kcal) {
+  ensureCurrentLogDate();
+  state.workouts.push({ name, type, dur, kcal: kcal.replace(' kcal', '') });
+  renderWorkouts();
+  updateNutritionTotals();
+  schedulePersist();
+  toast('✅ ' + name.replace(/^\S+ /, '') + ' added!');
+}
+
+function removeWorkout(i) {
+  state.workouts.splice(i, 1);
+  renderWorkouts();
+  updateNutritionTotals();
+  schedulePersist();
+}
+
+function renderWorkouts() {
+  const emojis={Cardio:'🏃',Strength:'🏋️',Flexibility:'🧘',Sports:'⚽',Other:'💪'};
+  const colors={Cardio:'#FAECE7',Strength:'var(--purple-light)',Flexibility:'var(--green-light)',Sports:'var(--blue-light)',Other:'var(--amber-light)'};
+  document.getElementById('workoutLog').innerHTML = state.workouts.length ? state.workouts.map((w,i) => `
+    <div class="workout-card">
+      <div class="workout-icon" style="background:${colors[w.type]||'#f5f5f5'}">${emojis[w.type]||'💪'}</div>
+      <div class="workout-info">
+        <div class="workout-name">${w.name}</div>
+        <div class="workout-meta">${w.type} · ${w.dur} · ${w.kcal} kcal</div>
+      </div>
+      <span class="workout-badge" style="background:${colors[w.type]||'#f5f5f5'};color:var(--text)">${w.type}</span>
+      <button onclick="removeWorkout(${i})" style="border:none;background:none;color:var(--hint);cursor:pointer;padding:4px;font-size:18px;margin-left:4px">×</button>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:14px;padding:16px 0">No workouts logged today. Add one above!</div>';
+  document.getElementById('d-workouts').innerHTML = state.workouts.slice(-2).map(w =>
+    `<div class="food-entry"><div class="food-dot" style="background:var(--green)"></div>
+    <div class="food-name">${w.name}</div><div class="food-cal">${w.kcal} kcal</div></div>`
+  ).join('') || '<div style="color:var(--muted);font-size:13px;padding:8px 0">No workouts yet today</div>';
+}
+
+// TIMER
+function toggleTimer() {
+  if(state.timerRunning) {
+    clearInterval(state.timerInterval);
+    state.timerElapsed += Date.now() - state.timerStart;
+    state.timerRunning = false;
+    document.getElementById('timerBtn').textContent = '▶ Resume';
+  } else {
+    state.timerStart = Date.now();
+    state.timerRunning = true;
+    document.getElementById('timerBtn').textContent = '⏸ Pause';
+    state.timerInterval = setInterval(updateTimer, 1000);
+  }
+}
+function resetTimer() {
+  clearInterval(state.timerInterval);
+  state.timerRunning = false; state.timerElapsed = 0; state.timerStart = null;
+  document.getElementById('timerDisplay').textContent = '00:00:00';
+  document.getElementById('timerBtn').textContent = '▶ Start';
+}
+function updateTimer() {
+  const total = state.timerElapsed + (Date.now() - state.timerStart);
+  const s = Math.floor(total/1000)%60, m = Math.floor(total/60000)%60, h = Math.floor(total/3600000);
+  document.getElementById('timerDisplay').textContent =
+    [h,m,s].map(n=>String(n).padStart(2,'0')).join(':');
+}
+
+// WATER
+function renderWater() {
+  const wg = Math.max(1, Math.min(24, state.targets.waterGlasses || 8));
+  const drops = document.getElementById('waterDrops');
+  drops.innerHTML = '';
+  for (let i = 0; i < wg; i++) {
+    const d = document.createElement('div');
+    d.className = 'drop' + (i < state.water ? ' filled' : '');
+    d.textContent = '💧';
+    d.title = `Glass ${i + 1}`;
+    d.onclick = () => {
+      state.water = i < state.water ? i : i + 1;
+      renderWater();
+      schedulePersist();
+    };
+    drops.appendChild(d);
+  }
+  document.getElementById('waterCount').textContent = state.water;
+  document.getElementById('waterBar').style.width = Math.min(100, (state.water / wg) * 100) + '%';
+  document.getElementById('d-water').textContent = state.water;
+  const ml = state.water * 250;
+  const goalMl = wg * 250;
+  const sub = document.getElementById('waterSubLine');
+  if (sub) sub.textContent = `of ${wg} glasses · ${ml}ml / ${goalMl}ml`;
+  const hint = document.getElementById('waterHint');
+  if (hint) {
+    const left = Math.max(0, wg - state.water);
+    hint.textContent = left ? `${left} glasses to goal — keep sipping!` : 'Daily goal reached — great job!';
+  }
+}
+function addWater() {
+  const wg = state.targets.waterGlasses || 8;
+  if (state.water < wg) {
+    state.water++;
+    renderWater();
+    schedulePersist();
+    toast('💧 Glass added!');
+  } else toast('🎉 Daily goal reached!');
+}
+function removeWater() {
+  if (state.water > 0) {
+    state.water--;
+    renderWater();
+    schedulePersist();
+  }
+}
+function doAddCustomWater() {
+  const wg = state.targets.waterGlasses || 8;
+  const ml = +document.getElementById('cw-ml').value || 0;
+  const glasses = Math.round(ml / 250);
+  state.water = Math.min(wg, state.water + glasses);
+  renderWater();
+  closeModal('customWaterModal');
+  schedulePersist();
+  toast(`💧 Added ${ml}ml`);
+}
+
+// SLEEP
+function parseTimeToMinutes(t) {
+  const p = (t || '0:0').split(':');
+  const h = +p[0] || 0;
+  const m = +p[1] || 0;
+  return ((h * 60 + m) % (24 * 60) + 24 * 60) % (24 * 60);
+}
+
+function hoursBetweenBedWake(bed, wake) {
+  let b = parseTimeToMinutes(bed);
+  let w = parseTimeToMinutes(wake);
+  if (w <= b) w += 24 * 60;
+  return (w - b) / 60;
+}
+
+function qualityToEfficiency(q) {
+  const map = { '😴 Excellent': 94, '😊 Good': 84, '😐 Fair': 70, '😫 Poor': 55 };
+  return map[q] || 78;
+}
+
+function buildStages(hours, eff) {
+  const base = ['deep', 'light', 'rem', 'light', 'deep', 'rem', 'light', 'awake'];
+  const out = [...base];
+  if (!hours || hours < 1) return Array(8).fill('light');
+  if (eff < 82) out[7] = 'awake';
+  if (eff < 68) {
+    out[3] = 'awake';
+    out[5] = 'light';
+  }
+  return out;
+}
+
+function formatTimeParts(iso) {
+  const p = (iso || '12:00').split(':');
+  const h = +p[0] || 0;
+  const m = +p[1] || 0;
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  const hh = d.getHours();
+  return { h: hh % 12 || 12, m: String(m).padStart(2, '0'), ap: hh >= 12 ? 'PM' : 'AM' };
+}
+
+function syncSleepFormFromState() {
+  const s = state.sleep || defaultSleep();
+  const bt = document.getElementById('s-bedtime');
+  const wt = document.getElementById('s-wake');
+  const q = document.getElementById('s-quality');
+  if (bt) bt.value = s.bed ? String(s.bed).slice(0, 5) : '';
+  if (wt) wt.value = s.wake ? String(s.wake).slice(0, 5) : '';
+  if (q) {
+    const opts = [...q.options].map((o) => o.value);
+    q.value = opts.includes(s.quality) ? s.quality : opts[0];
+  }
+}
+
+function syncSleepMetricsForPage() {
+  const s = state.sleep || defaultSleep();
+  const hours = Number(s.hours) || 0;
+  const hasLog = hours > 0.05;
+  const elH = document.getElementById('s-hours');
+  const subH = document.getElementById('s-hours-sub');
+  if (elH) elH.textContent = hasLog ? hours.toFixed(1) : '—';
+  if (subH) subH.textContent = hasLog ? 'Time in bed (wake next day if earlier)' : 'Save a log below';
+  const bed = formatTimeParts(s.bed || '23:00');
+  const wak = formatTimeParts(s.wake || '06:30');
+  const setPair = (hId, mId, subId, parts, show) => {
+    const hEl = document.getElementById(hId);
+    const mEl = document.getElementById(mId);
+    const sEl = document.getElementById(subId);
+    if (hEl) hEl.textContent = show ? String(parts.h) : '—';
+    if (mEl) mEl.textContent = show ? `:${parts.m} ${parts.ap}` : '';
+    if (sEl) sEl.textContent = show ? 'Logged' : '—';
+  };
+  setPair('s-bed-h', 's-bed-m', 's-bed-sub', bed, hasLog);
+  setPair('s-wake-h', 's-wake-m', 's-wake-sub', wak, hasLog);
+  const eff = document.getElementById('s-eff');
+  const effSub = document.getElementById('s-eff-sub');
+  const effPct =
+    hasLog && (s.efficiency != null && s.efficiency > 0)
+      ? Math.round(s.efficiency)
+      : hasLog
+        ? qualityToEfficiency(s.quality || '')
+        : null;
+  if (eff) eff.textContent = effPct != null ? String(effPct) : '—';
+  if (effSub)
+    effSub.textContent = hasLog ? (s.quality || '').replace(/^[^\s]+\s*/, '').trim() || '—' : '—';
+}
+
+function renderSleep() {
+  const block = document.getElementById('sleepBlocks');
+  if (!block) return;
+  const s = state.sleep || defaultSleep();
+  const stages = s.stages && s.stages.length === 8 ? s.stages : buildStages(s.hours, s.efficiency);
+  const labels = ['1', '2', '3', '4', '5', '6', '7', '8'];
+  block.innerHTML = stages
+    .map(
+      (st, i) =>
+        `<div class="sleep-hr ${st} sleep-stage-hr" title="Segment ${i + 1} · ${st}">${labels[i]}</div>`
+    )
+    .join('');
+  syncSleepMetricsForPage();
+}
+
+function logSleep() {
+  const bed = document.getElementById('s-bedtime') && document.getElementById('s-bedtime').value;
+  const wake = document.getElementById('s-wake') && document.getElementById('s-wake').value;
+  const qualityEl = document.getElementById('s-quality');
+  const quality = qualityEl ? qualityEl.value : '😴 Excellent';
+  if (!bed || !wake) {
+    toast('Set bedtime and wake time');
+    return;
+  }
+  const hoursRaw = hoursBetweenBedWake(bed, wake);
+  if (!hoursRaw || hoursRaw <= 0 || hoursRaw > 24) {
+    toast('Check times — need about 1–24 hours between bed and wake');
+    return;
+  }
+  ensureCurrentLogDate();
+  const efficiency = qualityToEfficiency(quality);
+  state.sleep = {
+    bed,
+    wake,
+    quality,
+    hours: Math.round(hoursRaw * 10) / 10,
+    efficiency,
+    stages: buildStages(hoursRaw, efficiency),
+  };
+  renderSleep();
+  refreshDashboard();
+  updateNutritionTotals();
+  refreshChartsFromHistory();
+  schedulePersist();
+  toast(`😴 Saved · ~${state.sleep.hours} h in bed · est. efficiency ${efficiency}%`);
+}
+
+function saveStepsToday() {
+  const inp = document.getElementById('d-steps-input');
+  const v = inp ? +inp.value || 0 : 0;
+  state.stepsToday = Math.max(0, Math.round(v));
+  const key = state.logDate || localYMD();
+  if (!state.history) state.history = {};
+  state.history[key] = { ...(state.history[key] || {}), steps: state.stepsToday };
+  pruneHistory();
+  refreshDashboard();
+  refreshChartsFromHistory();
+  schedulePersist();
+  toast('Steps saved for today');
+}
+
+// BMI
+function calcBMI() {
+  let h = +document.getElementById('bmi-h').value;
+  let w = +document.getElementById('bmi-w').value;
+  const hu = document.getElementById('bmi-hu').value;
+  const wu = document.getElementById('bmi-wu').value;
+  if(hu==='in') h = h*2.54;
+  if(wu==='lbs') w = w*0.453592;
+  if(!h||!w) { toast('Please enter height and weight'); return; }
+  const bmi = w / ((h/100)**2);
+  const bmiVal = bmi.toFixed(1);
+  let cat, color;
+  if(bmi<18.5){cat='Underweight';color='#378ADD';}
+  else if(bmi<25){cat='Normal Weight';color='#1D9E75';}
+  else if(bmi<30){cat='Overweight';color='#EF9F27';}
+  else{cat='Obese';color='#D85A30';}
+  document.getElementById('bmiVal').textContent = bmiVal;
+  document.getElementById('bmiVal').style.color = color;
+  document.getElementById('bmiCat').textContent = cat;
+  document.getElementById('bmiCat').style.color = color;
+  // marker: 15=0%, 18.5=22%, 25=52%, 30=75%, 40=100%
+  const pct = Math.min(100, Math.max(0, (bmi-15)/(40-15)*100));
+  document.getElementById('bmiMarker').style.left = pct+'%';
+  document.getElementById('bmiResult').style.display='block';
+}
+
+function logWeight() {
+  const w = document.getElementById('w-today').value;
+  if (!w) {
+    toast('Enter your weight');
+    return;
+  }
+  const kg = +w;
+  if (!kg || kg < 15 || kg > 400) {
+    toast('Enter a valid weight');
+    return;
+  }
+  const day = localYMD();
+  state.weightLog = [...(state.weightLog || []).filter((x) => x.day !== day), { day, kg: Math.round(kg * 10) / 10 }];
+  sortWeightLog();
+  persistWeightLocal();
+  renderBodyWeightUI();
+  schedulePersist();
+  document.getElementById('w-today').value = '';
+  toast(`Saved ${kg} kg for today — see Weight page for history`);
+}
+
+// GOALS
+function renderGoals() {
+  const catColors = {Fitness:'#1D9E75',Nutrition:'#378ADD',Sleep:'#7F77DD',Hydration:'#378ADD',Weight:'#D85A30'};
+  document.getElementById('goalsList').innerHTML = state.goals.map((g,i) => {
+    const pct = Math.min(100, Math.round(g.cur/g.tar*100));
+    const color = catColors[g.cat]||'#1D9E75';
+    return `<div class="goal-item">
+      <div class="goal-emoji">${g.emoji||'🎯'}</div>
+      <div class="goal-info">
+        <div class="goal-name">${g.name}</div>
+        <div class="goal-target">${g.cat} · Target by ${g.date}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>
+      <div style="text-align:right;min-width:60px">
+        <div class="goal-pct" style="color:${color}">${pct}%</div>
+        <div style="font-size:11px;color:var(--muted)">${g.cur}/${g.tar}</div>
+        <button onclick="removeGoal(${i})" style="border:none;background:none;color:var(--hint);cursor:pointer;font-size:14px;margin-top:4px">×</button>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:14px;padding:16px 0">No goals yet. Add your first goal!</div>';
+}
+
+function addGoal() {
+  const name = document.getElementById('g-name').value.trim();
+  if(!name) { toast('Enter goal name'); return; }
+  const emojis={Fitness:'🏃',Nutrition:'🥗',Sleep:'😴',Hydration:'💧',Weight:'⚖️'};
+  const cat = document.getElementById('g-cat').value;
+  state.goals.push({name, cat, emoji:emojis[cat]||'🎯',
+    cur:+document.getElementById('g-cur').value||0,
+    tar:+document.getElementById('g-tar').value||100,
+    date:document.getElementById('g-date').value
+  });
+  closeModal('goalModal');
+  document.getElementById('g-name').value='';
+  renderGoals(); schedulePersist(); toast('✅ Goal added!');
+}
+
+function removeGoal(i) {
+  state.goals.splice(i, 1);
+  renderGoals();
+  schedulePersist();
+}
+
+// REMINDERS
+function renderReminders() {
+  document.getElementById('remindersList').innerHTML = state.reminders.map((r,i) => `
+    <div class="${r.on ? 'notif' : 'notif warn'}" style="position:relative">
+      <div class="notif-icon">${r.type.split(' ')[0]}</div>
+      <div class="notif-content">
+        <div class="notif-title">${r.title}</div>
+        <div class="notif-body">${r.type} · ${r.repeat}</div>
+        <div class="notif-time">⏰ ${r.time}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+          <input type="checkbox" ${r.on?'checked':''} onchange="toggleReminder(${i},this.checked)" style="width:16px;height:16px;accent-color:var(--green)">
+          ${r.on?'On':'Off'}
+        </label>
+        <button onclick="removeReminder(${i})" style="border:none;background:none;color:var(--hint);cursor:pointer;font-size:18px">×</button>
+      </div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:14px;padding:16px 0">No reminders set. Add your first reminder!</div>';
+}
+
+function toggleReminder(i, val) {
+  state.reminders[i].on = val; renderReminders(); updateBadge(); schedulePersist();
+}
+function updateBadge() {
+  const count = state.reminders.filter(r=>r.on).length;
+  const badge = document.getElementById('reminderBadge');
+  badge.textContent = count; badge.style.display = count ? '' : 'none';
+}
+
+function addReminder() {
+  const title = document.getElementById('r-title').value.trim();
+  if(!title) { toast('Enter reminder title'); return; }
+  state.reminders.push({
+    title, time:document.getElementById('r-time').value,
+    type:document.getElementById('r-type').value,
+    repeat:document.getElementById('r-repeat').value, on:true
+  });
+  closeModal('reminderModal');
+  document.getElementById('r-title').value='';
+  renderReminders(); updateBadge(); schedulePersist(); toast('✅ Reminder added!');
+}
+
+function removeReminder(i) {
+  state.reminders.splice(i, 1);
+  renderReminders();
+  updateBadge();
+  schedulePersist();
+}
+
+// PROFILE
+function saveProfile() {
+  const name = document.getElementById('prof-name').value.trim() || state.profile.name;
+  const age = +document.getElementById('prof-age').value || state.profile.age;
+  const gender = document.getElementById('prof-gender').value;
+  const height = +document.getElementById('prof-height').value || state.profile.height;
+  const weight = +document.getElementById('prof-weight').value || state.profile.weight;
+  const activity = document.getElementById('prof-activity').value;
+  state.profile = { name, age, gender, height, weight, activity };
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileAge').textContent = `${age} years · ${gender}`;
+  const initials = name.split(/\s+/).map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('profileAvatar').textContent = initials;
+  initDate();
+  schedulePersist();
+  toast('✅ Profile saved!');
+}
+function saveTargets() {
+  const num = (id, fallback) => {
+    const el = document.getElementById(id);
+    const v = el ? parseFloat(el.value) : NaN;
+    return Number.isFinite(v) && v > 0 ? v : fallback;
+  };
+  const d = defaultTargets();
+  state.targets = {
+    ...state.targets,
+    calories: num('t-cal', d.calories),
+    protein: num('t-prot', d.protein),
+    steps: Math.round(num('t-steps', d.steps)),
+    waterGlasses: Math.max(1, Math.round(num('t-water', d.waterGlasses))),
+    carbs: num('t-carb', d.carbs),
+    fat: num('t-fat', d.fat),
+    fiber: num('t-fiber', d.fiber),
+    sleepHours: num('t-sleep', d.sleepHours),
+  };
+  persistTargetsLocal();
+  updateNutritionTotals();
+  renderWater();
+  schedulePersist();
+  toast('Daily targets saved');
+}
+
+// BAR CHARTS
+function makeBarChart(containerId, data, color, maxVal) {
+  const rawMax = Math.max(...data, 1);
+  const max = maxVal && maxVal > 0 ? Math.max(maxVal, rawMax) : rawMax;
+  document.getElementById(containerId).innerHTML = data.map(v => `
+    <div class="bar-col">
+      <div class="bar-val">${v}</div>
+      <div class="bar" style="height:${Math.round(v/max*80)}px;background:${color}"></div>
+    </div>`).join('');
+}
+
+// INIT
+async function init() {
+  await loadStateFromServer();
+  ensureCurrentLogDate();
+  initDate();
+  makeBarChart('weightChart', [74, 73.5, 72.8, 72.1, 71.4, 70.8, 70], 'var(--coral)', 80);
+  renderWater();
+  syncSleepFormFromState();
+  renderSleep();
+  renderMeals();
+  renderWorkouts();
+  renderGoals();
+  renderReminders();
+  updateBadge();
+  updateNutritionTotals();
+  initBodyWeightForm();
+  renderBodyWeightUI();
+  document.querySelectorAll('.modal-overlay').forEach((o) => {
+    o.addEventListener('click', (e) => {
+      if (e.target === o) o.classList.remove('open');
+    });
+  });
+  setInterval(() => ensureCurrentLogDate(), 45000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') ensureCurrentLogDate();
+  });
+  // wire up date nav handlers
+  const prev = document.getElementById('prevDayBtn');
+  const next = document.getElementById('nextDayBtn');
+  const todayBtn = document.getElementById('todayBtn');
+  const picker = document.getElementById('datePicker');
+  if (prev) prev.addEventListener('click', (e) => { e.preventDefault(); goPrevDay(); });
+  if (next) next.addEventListener('click', (e) => { e.preventDefault(); goNextDay(); });
+  if (todayBtn) todayBtn.addEventListener('click', (e) => { e.preventDefault(); goToday(); });
+  if (picker) picker.addEventListener('change', (e) => { if (e.target.value) loadDate(e.target.value); });
+  updateDateNavUI();
+}
+
+// Load today's data initially (creates record if needed)
+init();
+</script>
+
+<script>
+// Override runFoodAI to remove blocking window.prompt and use inline clarification UI
+window.runFoodAI = async function () {
+  try {
+    const qEl = document.getElementById('aiInput');
+    const el = document.getElementById('aiResults');
+    if (!qEl || !el) return;
+    const q = qEl.value.trim(); if (!q) return toast('Enter a food description');
+    el.innerHTML = '<div style="color:var(--muted)">Thinking…</div>';
+    const r = await fetch(`${API_BASE}/ai/estimate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: q, date: state.logDate || localYMD(), meal: document.getElementById('f-meal') ? document.getElementById('f-meal').value : 'Lunch' })
+    });
+    if (!r.ok) throw new Error('AI request failed');
+    const data = await r.json();
+    if (data.follow_up) {
+      el.innerHTML = `<div style="color:var(--muted)">${data.follow_up}</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="ai_clarify" placeholder="e.g. 1 plate, 150g, 2 cups" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px">
+          <button class="btn btn-primary" id="ai_clarify_btn">Send</button>
+          <button class="btn btn-outline" id="ai_clarify_cancel">Cancel</button>
+        </div>`;
+      document.getElementById('ai_clarify_btn').addEventListener('click', () => {
+        const reply = document.getElementById('ai_clarify').value.trim();
+        if (reply) { qEl.value = q + ' ; ' + reply; window.runFoodAI(); }
+      });
+      document.getElementById('ai_clarify_cancel').addEventListener('click', () => { el.innerHTML = '<div style="color:var(--muted)">Clarification cancelled.</div>'; });
+      return;
+    }
+    if (data.error) {
+      el.innerHTML = `<div style="color:var(--muted)">AI error: ${data.error}</div>`;
+      return;
+    }
+    // Render editable result (simple table)
+    const items = (data.result && data.result.items) || [];
+    window.lastAIItems = items;
+    let html = `<div><strong>Estimated Nutrition (Editable)</strong></div><div style="margin-top:8px">`;
+    html += items.map((it, idx) => `<div style="display:flex;gap:8px;align-items:center;margin:6px 0">
+        <input data-ai-idx="${idx}" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px" value="${(it.name||'').replace(/"/g,'&quot;')}">
+        <input data-ai-cal="${idx}" style="width:90px;padding:8px;border:1px solid var(--border);border-radius:8px" value="${it.cal || 0}">
+      </div>`).join('');
+    html += `</div><div style="margin-top:10px"><div id="aiActions"></div></div>`;
+    el.innerHTML = html;
+    const actions = document.getElementById('aiActions');
+    if (actions) actions.innerHTML = `<button class="btn btn-primary" onclick="addAIToDay()">✅ Add to day</button> <button class="btn btn-outline" onclick="document.getElementById('aiResults').innerHTML=''">Cancel</button> <span style="color:var(--muted);margin-left:10px">Edit items before saving</span>`;
+  } catch (e) {
+    console.error(e);
+    toast('AI request failed');
+  }
+};
+</script>
+
+</body>
+</html>
