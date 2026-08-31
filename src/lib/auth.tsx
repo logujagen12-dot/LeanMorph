@@ -18,6 +18,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  setLocalProfile: (profile: UserProfile | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -101,9 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile((prev) => (prev ? { ...prev, ...updates } : prev));
   };
 
+  const setLocalProfile = (p: UserProfile | null) => {
+    setProfile(p);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ session, profile, loading, signUp, signIn, signOut, refreshProfile, updateProfile }}
+      value={{ session, profile, loading, signUp, signIn, signOut, refreshProfile, updateProfile, setLocalProfile }}
     >
       {children}
     </AuthContext.Provider>

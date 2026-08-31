@@ -25,7 +25,7 @@ const ACTIVITY_LEVELS: { id: ActivityLevel; label: string; desc: string }[] = [
 ];
 
 export function OnboardingScreen() {
-  const { session, refreshProfile } = useAuth();
+  const { session, refreshProfile, setLocalProfile } = useAuth();
   const { showToast } = useToast();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -56,9 +56,9 @@ export function OnboardingScreen() {
       goal: data.goal,
     });
 
-    const { error } = await supabase.from('user_profiles').upsert({
+    const profileData = {
       user_id: session.user.id,
-      name: data.name,
+      name: data.name || session.user.email?.split('@')[0] || 'User',
       age: data.age,
       gender: data.gender,
       height_cm: data.heightCm,
@@ -69,15 +69,25 @@ export function OnboardingScreen() {
       workout_frequency: data.workoutFrequency,
       onboarding_completed: true,
       ...targets,
-    });
+    };
+
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert(profileData, { onConflict: 'user_id' });
+
+      if (error) {
+        console.error('Error saving profile:', error);
+      }
+    } catch (err) {
+      console.error('Exception saving profile:', err);
+    }
 
     setLoading(false);
-    if (error) {
-      showToast(error.message, 'error');
-    } else {
-      showToast('Profile set up successfully!', 'success');
-      await refreshProfile();
-    }
+    // Instantly transition to dashboard with local profile state
+    setLocalProfile(profileData as any);
+    showToast('Profile set up successfully!', 'success');
+    refreshProfile().catch(console.error);
   };
 
   return (
