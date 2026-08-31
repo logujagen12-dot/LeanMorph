@@ -53,7 +53,20 @@ export function AddFoodScreen({ selectedDate, preselectedMeal, onAdded }: AddFoo
     }
     q = q.limit(50);
     const { data } = await q.order('name', { ascending: true });
-    setFoods((data as Food[]) || []);
+    const remoteFoods = (data as Food[]) || [];
+    if (remoteFoods.length > 0) {
+      setFoods(remoteFoods);
+    } else {
+      const { DEFAULT_FOODS } = await import('@/lib/defaultFoods');
+      let filtered = DEFAULT_FOODS;
+      if (searchQuery) {
+        filtered = filtered.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      }
+      if (cat !== 'All') {
+        filtered = filtered.filter((f) => f.category.toLowerCase() === cat.toLowerCase());
+      }
+      setFoods(filtered);
+    }
     setLoading(false);
   }, []);
 
@@ -117,11 +130,12 @@ export function AddFoodScreen({ selectedDate, preselectedMeal, onAdded }: AddFoo
       unit
     );
 
+    const foodId = String(selectedFood.id).startsWith('df-') ? null : selectedFood.id;
     const { error } = await supabase.from('food_entries').insert({
       user_id: session.user.id,
       date: selectedDate,
       meal,
-      food_id: selectedFood.id,
+      food_id: foodId,
       food_name: selectedFood.name,
       quantity,
       unit,

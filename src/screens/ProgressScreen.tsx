@@ -51,27 +51,27 @@ export function ProgressScreen() {
       const d = e.date as string;
       if (dayMap.has(d)) {
         const day = dayMap.get(d)!;
-        day.calories += e.calories as number;
-        day.protein += e.protein as number;
-        day.carbs += e.carbs as number;
-        day.fat += e.fat as number;
-        day.fiber += e.fiber as number;
+        day.calories += Number(e.calories) || 0;
+        day.protein += Number(e.protein) || 0;
+        day.carbs += Number(e.carbs) || 0;
+        day.fat += Number(e.fat) || 0;
+        day.fiber += Number(e.fiber) || 0;
       }
     });
 
     (waterRes.data as Array<Record<string, unknown>>)?.forEach((w) => {
       const d = w.date as string;
-      if (dayMap.has(d)) dayMap.get(d)!.water += w.amount_ml as number;
+      if (dayMap.has(d)) dayMap.get(d)!.water += Number(w.amount_ml) || 0;
     });
 
     (stepsRes.data as Array<Record<string, unknown>>)?.forEach((s) => {
       const d = s.date as string;
-      if (dayMap.has(d)) dayMap.get(d)!.steps += s.steps as number;
+      if (dayMap.has(d)) dayMap.get(d)!.steps += Number(s.steps) || 0;
     });
 
     (sleepRes.data as Array<Record<string, unknown>>)?.forEach((s) => {
       const d = s.date as string;
-      if (dayMap.has(d)) dayMap.get(d)!.sleep += s.duration_hours as number;
+      if (dayMap.has(d)) dayMap.get(d)!.sleep += Number(s.duration_hours) || 0;
     });
 
     (workoutsRes.data as Array<Record<string, unknown>>)?.forEach((w) => {
@@ -81,7 +81,7 @@ export function ProgressScreen() {
 
     const sorted = Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
     setChartData(sorted);
-    setWeightData((weightRes.data as Array<Record<string, unknown>>)?.map((w) => ({ date: w.date, weight: w.weight_kg })) || []);
+    setWeightData((weightRes.data as Array<Record<string, unknown>>)?.map((w) => ({ date: w.date, weight: Number(w.weight_kg) || 0 })) || []);
     setLoading(false);
   }, [session?.user, range]);
 
