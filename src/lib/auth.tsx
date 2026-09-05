@@ -42,13 +42,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        fetchProfile(session.user.id).finally(() => setLoading(false));
+        fetchProfile(session.user.id).finally(() => {
+          clearTimeout(timer);
+          setLoading(false);
+        });
       } else {
+        clearTimeout(timer);
         setLoading(false);
       }
+    }).catch((err) => {
+      console.warn('Auth getSession error:', err);
+      clearTimeout(timer);
+      setLoading(false);
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
